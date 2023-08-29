@@ -125,9 +125,16 @@ float g_CameraDistance = 3.5f;
 glm::vec3 g_FreeCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);  // Camera's position in world coordinates
 glm::vec3 g_FreeCameraFront = glm::vec3(0.0f, 0.0f, -1.0f);    // Camera's front direction
 glm::vec3 g_FreeCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);        // Camera's up direction
-float g_CameraSpeed = 0.1f;   
+float g_CameraSpeed = 0.5f;   
 float g_Yaw = -90.0f;  
-float g_Pitch = 0.0f;  
+float g_Pitch = 0.0f;
+bool g_WKeyPressed = false;
+bool g_SKeyPressed = false;
+bool g_AKeyPressed = false;
+bool g_DKeyPressed = false;
+
+#define CAMERA_ACCELERATION 1.0f
+#define MAX_CAMERA_SPEED 20.0f
 
 int main(int argc, char* argv[])
 {
@@ -178,8 +185,16 @@ int main(int argc, char* argv[])
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
+
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+    char lastPressedKey;
+
 	while (!glfwWindowShouldClose(window))
 	{
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(g_GpuProgramID);
@@ -188,6 +203,52 @@ int main(int argc, char* argv[])
         glm::vec4 camera_view_vector; 
         glm::vec4 camera_up_vector;
         if (g_IsFreeCamera){
+            if (g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed){
+                g_CameraSpeed += CAMERA_ACCELERATION * deltaTime;
+                if (g_CameraSpeed > MAX_CAMERA_SPEED){
+                    g_CameraSpeed = MAX_CAMERA_SPEED;
+                }
+            }
+            else{
+                g_CameraSpeed -= CAMERA_ACCELERATION * deltaTime * 2.0f;
+                if (g_CameraSpeed < 0.0f)
+                {
+                    g_CameraSpeed = 0.0f;
+                }
+            }
+
+            if (g_WKeyPressed){
+                lastPressedKey = 'W';
+                g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront * deltaTime;
+            }
+            if (g_SKeyPressed){
+                lastPressedKey = 'S';
+                g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront * deltaTime;
+            }
+            if (g_AKeyPressed){
+                lastPressedKey = 'A';
+                g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+            }
+            if (g_DKeyPressed){
+                lastPressedKey = 'D';
+                g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+            }
+
+            if (!(g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed)){
+                if (lastPressedKey == 'W'){
+                g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront * deltaTime;
+                }
+                if (lastPressedKey == 'S'){
+                    g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront * deltaTime;
+                }
+                if (lastPressedKey == 'A'){
+                    g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                }
+                if (lastPressedKey == 'D'){
+                    g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                }
+            }
+            
             camera_position_c = glm::vec4(g_FreeCameraPosition, 1.0f);
             camera_view_vector = glm::vec4(g_FreeCameraFront, 0.0f);
             camera_up_vector = glm::vec4(g_FreeCameraUp, 0.0f);
@@ -232,7 +293,10 @@ int main(int argc, char* argv[])
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 	glfwTerminate();
+    
 	return 0;
 }
 void LoadTextureImage(const char* filename)
@@ -644,22 +708,23 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 		fflush(stdout);
 	}
 
-    if (g_IsFreeCamera){
-        if (key == GLFW_KEY_W && action == GLFW_PRESS)
+    if (g_IsFreeCamera)
+    {
+        if (key == GLFW_KEY_W)
         {
-            g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront;
+            g_WKeyPressed = (action != GLFW_RELEASE);
         }
-        if (key == GLFW_KEY_S && action == GLFW_PRESS)
+        if (key == GLFW_KEY_S)
         {
-            g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront;
+            g_SKeyPressed = (action != GLFW_RELEASE);
         }
-        if (key == GLFW_KEY_A && action == GLFW_PRESS)
+        if (key == GLFW_KEY_A)
         {
-            g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed;
+            g_AKeyPressed = (action != GLFW_RELEASE);
         }
-        if (key == GLFW_KEY_D && action == GLFW_PRESS)
+        if (key == GLFW_KEY_D)
         {
-            g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed;
+            g_DKeyPressed = (action != GLFW_RELEASE);
         }
     }
 }
