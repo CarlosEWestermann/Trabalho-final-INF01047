@@ -29,6 +29,7 @@ uniform vec4 bbox_max;
 
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
+uniform sampler2D TextureImage1;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -97,8 +98,8 @@ void main()
     }
     else if (object_id == SPACESHIP)
     {
-       Kd = vec3(0.5, 0.5, 0.5);
-       lambert_diffuse_term = Kd * lambert;
+        Kd = texture(TextureImage1, texcoords).rgb;
+        lambert_diffuse_term = Kd * lambert;
     }
 
     // Cor final do fragmento calculada com uma combinação dos termos difuso, especular, e ambiente.

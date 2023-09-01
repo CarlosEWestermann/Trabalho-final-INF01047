@@ -101,6 +101,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 std::map<std::string, SceneObject> g_VirtualScene;
 std::stack<glm::mat4>  g_MatrixStack;
+
 float g_ScreenRatio = 1.0f;
 float g_AngleX = 0.0f;
 float g_AngleY = 0.0f;
@@ -122,9 +123,9 @@ bool g_ShowInfoText = true;
 float g_CameraTheta = 0.0f;       
 float g_CameraPhi = 0.15f;        
 float g_CameraDistance = 3.5f;
-glm::vec3 g_FreeCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);  // Camera's position in world coordinates
-glm::vec3 g_FreeCameraFront = glm::vec3(0.0f, 0.0f, -1.0f);    // Camera's front direction
-glm::vec3 g_FreeCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);        // Camera's up direction
+glm::vec3 g_FreeCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f); 
+glm::vec3 g_FreeCameraFront = glm::vec3(0.0f, 0.0f, -1.0f);   
+glm::vec3 g_FreeCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);       
 float g_CameraSpeed = 0.5f;   
 float g_Yaw = -90.0f;  
 float g_Pitch = 0.0f;
@@ -135,6 +136,7 @@ bool g_DKeyPressed = false;
 
 #define CAMERA_ACCELERATION 1.0f
 #define MAX_CAMERA_SPEED 20.0f
+
 
 int main(int argc, char* argv[])
 {
@@ -177,6 +179,7 @@ int main(int argc, char* argv[])
 	ObjModel spheremodel("../../data/sphere.obj");
 	ComputeNormals(&spheremodel);
 	BuildTrianglesAndAddToVirtualScene(&spheremodel);
+	LoadTextureImage("../../data/metal.png");
 	ObjModel spaceshipmodel("../../data/spaceship.obj");
 	ComputeNormals(&spaceshipmodel);
 	BuildTrianglesAndAddToVirtualScene(&spaceshipmodel);
@@ -267,8 +270,8 @@ int main(int argc, char* argv[])
 
 		glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
 		glm::mat4 projection;
-		float nearplane = -0.1f;                
-		float farplane  = -10.0f;               
+		float nearplane = -1.0f;                
+		float farplane  = -100.0f;               
 		float field_of_view = 3.141592 / 3.0f;  
 		projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
 		glm::mat4 model = Matrix_Identity(); 
@@ -276,6 +279,8 @@ int main(int argc, char* argv[])
 		glUniformMatrix4fv(g_projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 		#define SPHERE 0
 		#define SPACESHIP 1
+
+		//draw space sphere
 		model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z)*Matrix_Scale(2.0f,2.0f,-2.0f);
 		glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
 		glUniform1i(g_object_id_uniform, SPHERE);
@@ -284,6 +289,8 @@ int main(int argc, char* argv[])
 		DrawVirtualObject("the_sphere");
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
+
+		//draw spaceship
 		model = Matrix_Translate(1.0f,0.0f,0.0f);
 		glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
 		glUniform1i(g_object_id_uniform, SPACESHIP);
