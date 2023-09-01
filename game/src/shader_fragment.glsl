@@ -29,6 +29,8 @@ uniform vec4 bbox_max;
 
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
+uniform sampler2D TextureImage1;
+uniform sampler2D TextureImage2;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -73,10 +75,6 @@ void main()
     vec3 phong_specular_term = vec3(0,0,0);
     vec3 ambient_term = vec3(0,0,0);
 
-    // Coordenadas de textura U e V
-    float U = 0.0;
-    float V = 0.0;
-
     if (object_id == SPHERE)
     {
         vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
@@ -85,10 +83,9 @@ void main()
         float theta = atan(position_model.x, position_model.z);
         float phi = asin(position_model.y/raio);
 
-        U = (theta + M_PI)/(2*M_PI);
-        V = (phi + M_PI/2)/M_PI;
+        float U = (theta + M_PI)/(2*M_PI);
+        float V = (phi + M_PI/2)/M_PI;
 
-        // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
         Kd = texture(TextureImage0, vec2(U,V)).rgb;
         Ia = vec3(0.8,0.8,0.8);
 
@@ -97,8 +94,9 @@ void main()
     }
     else if (object_id == SPACESHIP)
     {
-       Kd = vec3(0.5, 0.5, 0.5);
-       lambert_diffuse_term = Kd * lambert;
+       vec3 Kd1 = texture(TextureImage1, texcoords).rgb;
+       vec3 Kd2 = texture(TextureImage2, texcoords).rgb;
+       lambert_diffuse_term = (Kd1 + Kd2) * lambert;
     }
 
     // Cor final do fragmento calculada com uma combinação dos termos difuso, especular, e ambiente.

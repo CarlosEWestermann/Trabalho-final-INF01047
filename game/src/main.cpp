@@ -175,10 +175,20 @@ GLuint g_NumLoadedTextures = 0;
 // Variável que controla se o texto informativo será mostrado na tela.
 bool g_ShowInfoText = true;
 
-// Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
-float g_CameraTheta = 0.0f;       // Ângulo no plano ZX em relação ao eixo Z
-float g_CameraPhi = 0.15f;        // Ângulo em relação ao eixo Y (a camera sobe)
-float g_CameraDistance = 3.5f;    // Distância da câmera para a origem
+bool g_IsFreeCamera = true;
+glm::vec3 g_FreeCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 g_FreeCameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 g_FreeCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float g_CameraSpeed = 0.5f;
+float g_Yaw = -90.0f;
+float g_Pitch = 0.0f;
+bool g_WKeyPressed = false;
+bool g_SKeyPressed = false;
+bool g_AKeyPressed = false;
+bool g_DKeyPressed = false;
+
+#define CAMERA_ACCELERATION 1.0f
+#define MAX_CAMERA_SPEED 20.0f
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// IMPLEMENTAÇÃO DAS FUNÇÕES //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +261,9 @@ int main(int argc, char* argv[])
     /////// CARREGANDO TEXTURAS E MODELOS 3D NO FORMATO OBJ ////////////////////////////////////////////////////
 
     // Carregamos duas imagens para serem utilizadas como textura
-    LoadTextureImage("../../data/universe.png");      // TextureImage0
+    LoadTextureImage("../../data/universe.png");                       // TextureImage0
+    LoadTextureImage("../../data/spaceshiptextures/emi.jpg");          // TextureImage1
+    LoadTextureImage("../../data/spaceshiptextures/blender.jpg");      // TextureImage2
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -276,10 +288,17 @@ int main(int argc, char* argv[])
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+    char lastPressedKey;
+
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
-        // Aqui executamos as operações de renderização
+        // Calculando o tempo passado desde a última animação
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         // Definimos a cor do "fundo" do framebuffer como branco.
         //           R     G     B     A
@@ -294,16 +313,82 @@ int main(int argc, char* argv[])
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////// CALCULANDO POSIÇÃO E SENTIDO DA CAMERA /////////////////////////////////////////////////////////////
 
-        float r = g_CameraDistance;
-        float y = r*sin(g_CameraPhi);
-        float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
-        float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+        glm::vec4 camera_position_c;
+        glm::vec4 camera_lookat_l;
+        glm::vec4 camera_view_vector;
+        glm::vec4 camera_up_vector;
 
-        // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f);                // Ponto "c", centro da câmera
-        glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f);       // Ponto "l", para onde a câmera (look-at) estará sempre olhando
-        glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c;  // Vetor "view", sentido para onde a câmera está virada
-        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);       // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        if (g_IsFreeCamera)
+        {
+            if (g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed)
+            {
+                g_CameraSpeed += CAMERA_ACCELERATION * deltaTime;
+                if (g_CameraSpeed > MAX_CAMERA_SPEED)
+                {
+                    g_CameraSpeed = MAX_CAMERA_SPEED;
+                }
+            }
+            else
+            {
+                g_CameraSpeed -= CAMERA_ACCELERATION * deltaTime * 2.0f;
+                if (g_CameraSpeed < 0.0f)
+                {
+                    g_CameraSpeed = 0.0f;
+                }
+            }
+            if (g_WKeyPressed)
+            {
+                lastPressedKey = 'W';
+                g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront * deltaTime;
+            }
+            if (g_SKeyPressed)
+            {
+                lastPressedKey = 'S';
+                g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront * deltaTime;
+            }
+            if (g_AKeyPressed)
+            {
+                lastPressedKey = 'A';
+                g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+            }
+            if (g_DKeyPressed)
+            {
+                lastPressedKey = 'D';
+                g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+            }
+
+            if (!(g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed))
+            {
+                if (lastPressedKey == 'W')
+                {
+                g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront * deltaTime;
+                }
+                if (lastPressedKey == 'S')
+                {
+                    g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront * deltaTime;
+                }
+                if (lastPressedKey == 'A')
+                {
+                    g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                }
+                if (lastPressedKey == 'D')
+                {
+                    g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                }
+            }
+            camera_position_c = glm::vec4(g_FreeCameraPosition, 1.0f);
+            camera_view_vector = glm::vec4(g_FreeCameraFront, 0.0f);
+            camera_up_vector = glm::vec4(g_FreeCameraUp, 0.0f);
+        }
+        else
+        {
+            // TO DO: CAMERA LOOK AT
+            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
+            camera_position_c  = glm::vec4(0,0,-20,1.0f);              // Ponto "c", centro da câmera
+            camera_lookat_l    = glm::vec4(0.0f,0.0f,-1.0f,1.0f);       // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+            camera_view_vector = camera_lookat_l - camera_position_c;  // Vetor "view", sentido para onde a câmera está virada
+            camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);       // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        }
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para definir o sistema de coordenadas da câmera.
         glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
@@ -313,7 +398,7 @@ int main(int argc, char* argv[])
 
         // Note que, no sistema de coordenadas da câmera, os planos near e far estão no sentido negativo!
         float nearplane = -0.1f;                // Posição do "near plane"
-        float farplane  = -10.0f;               // Posição do "far plane"
+        float farplane  = -100.0f;               // Posição do "far plane"
         float field_of_view = 3.141592 / 3.0f;  // FOV PI/3 radianos = 60 graus
 
         // Projeção Perspectiva.
@@ -332,11 +417,12 @@ int main(int argc, char* argv[])
         #define SPHERE 0
         #define SPACESHIP 1
 
+        glm::mat4 identity = Matrix_Identity(); // Transformação identidade de modelagem
         glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
 
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, SPHERE);
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
@@ -345,12 +431,12 @@ int main(int argc, char* argv[])
         glEnable(GL_DEPTH_TEST);
 
         // Desenhamos modelo da nave
-        model = Matrix_Translate(camera_position_c.x, camera_position_c.y - 2, camera_position_c.z - 5)*Matrix_Scale(0.2f,0.2f,-0.2f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+        glUniformMatrix4fv(g_view_uniform, 1, GL_FALSE, glm::value_ptr(identity));
         glUniform1i(g_object_id_uniform, SPACESHIP);
-        glDisable(GL_CULL_FACE);
         DrawVirtualObject("the_spaceship");
-        glEnable(GL_CULL_FACE);
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -869,31 +955,34 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 // Função callback chamada sempre que o usuário movimentar o cursor do mouse em cima da janela OpenGL.
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (g_LeftMouseButtonPressed)
-    {
-        // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
-        float dx = xpos - g_LastCursorPosX;
-        float dy = ypos - g_LastCursorPosY;
+	if (g_LeftMouseButtonPressed)
+	{
+		float dx = xpos - g_LastCursorPosX;
+		float dy = ypos - g_LastCursorPosY;
+        float sensitivity = 0.05f;
+        dx *= sensitivity;
+        dy *= sensitivity;
 
-        // Atualizamos parâmetros da câmera com os deslocamentos
-        g_CameraTheta -= 0.01f*dx;
-        g_CameraPhi   += 0.01f*dy;
+        if (g_IsFreeCamera)
+        {
+            g_Yaw += dx;
+            g_Pitch -= dy;
 
-        // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
-        float phimax = 3.141592f/2;
-        float phimin = -phimax;
+            if (g_Pitch > 89.0f)
+                g_Pitch = 89.0f;
+            if (g_Pitch < -89.0f)
+                g_Pitch = -89.0f;
 
-        if (g_CameraPhi > phimax)
-            g_CameraPhi = phimax;
+            glm::vec3 front;
+            front.x = cos(glm::radians(g_Yaw)) * cos(glm::radians(g_Pitch));
+            front.y = sin(glm::radians(g_Pitch));
+            front.z = sin(glm::radians(g_Yaw)) * cos(glm::radians(g_Pitch));
+            g_FreeCameraFront = glm::normalize(front);
+        }
 
-        if (g_CameraPhi < phimin)
-            g_CameraPhi = phimin;
-
-        // Atualizamos as variáveis globais para armazenar a posição atual do
-        // cursor como sendo a última posição conhecida do cursor.
-        g_LastCursorPosX = xpos;
-        g_LastCursorPosY = ypos;
-    }
+		g_LastCursorPosX = xpos;
+		g_LastCursorPosY = ypos;
+	}
 }
 
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
@@ -914,6 +1003,32 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_H && action == GLFW_PRESS)
     {
         g_ShowInfoText = !g_ShowInfoText;
+    }
+
+    // Se o usuário apertar a tecla F, fazemos um "toggle" do tipo de câmera.
+    if (key == GLFW_KEY_F && action == GLFW_PRESS)
+    {
+        g_IsFreeCamera = !g_IsFreeCamera;
+    }
+
+    if (g_IsFreeCamera)
+    {
+        if (key == GLFW_KEY_W)
+        {
+            g_WKeyPressed = (action != GLFW_RELEASE);
+        }
+        if (key == GLFW_KEY_S)
+        {
+            g_SKeyPressed = (action != GLFW_RELEASE);
+        }
+        if (key == GLFW_KEY_A)
+        {
+            g_AKeyPressed = (action != GLFW_RELEASE);
+        }
+        if (key == GLFW_KEY_D)
+        {
+            g_DKeyPressed = (action != GLFW_RELEASE);
+        }
     }
 }
 
