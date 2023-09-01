@@ -21,6 +21,7 @@ uniform mat4 projection;
 // Identificador que define qual objeto está sendo desenhado no momento
 #define SPHERE 0
 #define SPACESHIP 1
+#define ASTEROID 2
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -31,6 +32,7 @@ uniform vec4 bbox_max;
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
+uniform sampler2D TextureImage3;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -97,6 +99,12 @@ void main()
        vec3 Kd1 = texture(TextureImage1, texcoords).rgb;
        vec3 Kd2 = texture(TextureImage2, texcoords).rgb;
        lambert_diffuse_term = (Kd1 + Kd2) * lambert;
+    }
+
+    else if (object_id == ASTEROID)
+    {
+       vec3 Kd1 = texture(TextureImage3, texcoords).rgb;
+       lambert_diffuse_term = Kd1 * lambert;
     }
 
     // Cor final do fragmento calculada com uma combinação dos termos difuso, especular, e ambiente.

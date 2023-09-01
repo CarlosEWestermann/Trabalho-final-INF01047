@@ -138,6 +138,10 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+//funcoes auxiliares 
+void PushMatrix(glm::mat4 M);
+void PopMatrix(glm::mat4& M);
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// DEFINIÇÃO DE VARIÁVEIS GLOBAIS //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -264,6 +268,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/universe.png");                       // TextureImage0
     LoadTextureImage("../../data/spaceshiptextures/emi.jpg");          // TextureImage1
     LoadTextureImage("../../data/spaceshiptextures/blender.jpg");      // TextureImage2
+    LoadTextureImage("../../data/asteroidtextures/rock_texture.jpg");      // TextureImage3
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -273,6 +278,10 @@ int main(int argc, char* argv[])
     ObjModel spaceshipmodel("../../data/spaceship.obj");
     ComputeNormals(&spaceshipmodel);
     BuildTrianglesAndAddToVirtualScene(&spaceshipmodel);
+
+    ObjModel asteroidmodel("../../data/asteroid.obj");
+    ComputeNormals(&asteroidmodel);
+    BuildTrianglesAndAddToVirtualScene(&asteroidmodel);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -416,6 +425,7 @@ int main(int argc, char* argv[])
 
         #define SPHERE 0
         #define SPACESHIP 1
+        #define ASTEROID 2
 
         glm::mat4 identity = Matrix_Identity(); // Transformação identidade de modelagem
         glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
@@ -430,12 +440,19 @@ int main(int argc, char* argv[])
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
+        model = Matrix_Translate(0,0,-18)*Matrix_Scale(1.0f/250.0f, 1.0f/250.0f, 1.0f/250.0f);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, ASTEROID);
+        DrawVirtualObject("asteroid");
+
         // Desenhamos modelo da nave
+
         model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
         glUniformMatrix4fv(g_view_uniform, 1, GL_FALSE, glm::value_ptr(identity));
         glUniform1i(g_object_id_uniform, SPACESHIP);
         DrawVirtualObject("the_spaceship");
+
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -564,6 +581,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage0"), 0);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage1"), 1);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
     glUseProgram(0);
 }
 
@@ -1237,4 +1255,24 @@ void PrintObjModelInfo(ObjModel* model)
     }
     printf("\n");
   }
+}
+
+// Função que pega a matriz M e guarda a mesma no topo da pilha
+void PushMatrix(glm::mat4 M)
+{
+    g_MatrixStack.push(M);
+}
+
+// Função que remove a matriz atualmente no topo da pilha e armazena a mesma na variável M
+void PopMatrix(glm::mat4& M)
+{
+    if ( g_MatrixStack.empty() )
+    {
+        M = Matrix_Identity();
+    }
+    else
+    {
+        M = g_MatrixStack.top();
+        g_MatrixStack.pop();
+    }
 }
