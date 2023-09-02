@@ -208,6 +208,7 @@ bool g_WKeyPressed = false;
 bool g_SKeyPressed = false;
 bool g_AKeyPressed = false;
 bool g_DKeyPressed = false;
+bool g_SpaceKeyPressed = false;
 
 #define CAMERA_ACCELERATION 3.0f
 #define MAX_CAMERA_SPEED 20.0f
@@ -322,6 +323,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/spaceshiptextures/blender.jpg");      // TextureImage2
     LoadTextureImage("../../data/asteroidtextures/rock_texture.jpg");  // TextureImage3
     LoadTextureImage("../../data/cointextures/gold.png");              // TextureImage4
+    LoadTextureImage("../../data/rockettextures/rocket.png");          // TextureImage5
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -339,6 +341,10 @@ int main(int argc, char* argv[])
     ObjModel coinmodel("../../data/coin.obj");
     ComputeNormals(&coinmodel);
     BuildTrianglesAndAddToVirtualScene(&coinmodel);
+
+    ObjModel rocketmodel("../../data/rocket.obj");
+    ComputeNormals(&rocketmodel);
+    BuildTrianglesAndAddToVirtualScene(&rocketmodel);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -494,6 +500,7 @@ int main(int argc, char* argv[])
         #define COIN 3
         #define REDBALL 4
         #define BLUEBALL 5
+        #define ROCKET 6
 
         glm::mat4 identity = Matrix_Identity();
         glm::mat4 model = Matrix_Identity();
@@ -509,12 +516,25 @@ int main(int argc, char* argv[])
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
+
+        if (g_SpaceKeyPressed)
+        {
+            // Desenhamos o modelo do foguete
+            model = Matrix_Translate(0, 0, -15)*Matrix_Rotate_Y(0.1,0.1,0.1);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, ROCKET);
+            glDisable(GL_CULL_FACE);
+            DrawVirtualObject("the_rocket");
+            glEnable(GL_CULL_FACE);
+        }
+
+/*
         // Desenhamos vários meteoros
         if (meteorStartTime == 0)
         {
             meteorStartTime = currentFrame;
-            meteorTime = 2 + (rand() % 5);
-            meteorColor = 4 + (rand() % 2);
+            meteorTime = 2 + (rand() % 5);  // sorteia entre 2 e 6 segundos
+            meteorColor = 4 + (rand() % 2); // sorteia entre REDBALL(4) e BLUEBALL(5)
             bezierControlPoint1 = glm::vec4(-200 + rand() % 500, 300, -300.0f, 1);
             bezierControlPoint2 = glm::vec4(-200 + rand() % 500, 100.0f, -300.0f, 1);
             bezierControlPoint3 = glm::vec4(-200 + rand() % 500, -100.0f, -300.0f, 1);
@@ -605,7 +625,7 @@ int main(int argc, char* argv[])
                 toggle = true;
             }
         }
-
+*/
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -735,6 +755,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage5"), 5);
     glUseProgram(0);
 }
 
@@ -1200,6 +1221,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         {
             g_DKeyPressed = (action != GLFW_RELEASE);
         }
+    }
+
+    // Se o usuário apertar espaço
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    {
+        g_SpaceKeyPressed = true;
     }
 }
 

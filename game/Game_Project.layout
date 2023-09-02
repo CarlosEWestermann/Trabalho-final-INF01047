@@ -12,43 +12,38 @@
 			<Cursor1 position="0" topLine="465" />
 		</Cursor>
 	</File>
-	<File name="src\shader_fragment.glsl" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3611" topLine="83" />
-		</Cursor>
-	</File>
 	<File name="src\main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="10435" topLine="176" />
+			<Cursor1 position="24834" topLine="468" />
 		</Cursor>
 		<Folding>
 			<Collapse line="46" />
-			<Collapse line="595" />
-			<Collapse line="606" />
-			<Collapse line="647" />
-			<Collapse line="671" />
-			<Collapse line="703" />
-			<Collapse line="762" />
-			<Collapse line="810" />
-			<Collapse line="857" />
-			<Collapse line="898" />
-			<Collapse line="911" />
-			<Collapse line="924" />
-			<Collapse line="989" />
-			<Collapse line="1006" />
-			<Collapse line="1037" />
-			<Collapse line="1047" />
-			<Collapse line="1068" />
-			<Collapse line="1073" />
-			<Collapse line="1088" />
-			<Collapse line="1098" />
-			<Collapse line="1121" />
+			<Collapse line="763" />
+			<Collapse line="822" />
+			<Collapse line="870" />
+			<Collapse line="917" />
+			<Collapse line="958" />
+			<Collapse line="971" />
+			<Collapse line="984" />
+			<Collapse line="1049" />
+			<Collapse line="1066" />
+			<Collapse line="1097" />
+			<Collapse line="1107" />
 			<Collapse line="1128" />
-			<Collapse line="1168" />
-			<Collapse line="1174" />
-			<Collapse line="1208" />
-			<Collapse line="1375" />
-			<Collapse line="1381" />
+			<Collapse line="1133" />
+			<Collapse line="1148" />
+			<Collapse line="1158" />
+			<Collapse line="1181" />
+			<Collapse line="1234" />
+			<Collapse line="1240" />
+			<Collapse line="1274" />
+			<Collapse line="1441" />
+			<Collapse line="1447" />
 		</Folding>
+	</File>
+	<File name="src\shader_fragment.glsl" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1249" topLine="19" />
+		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

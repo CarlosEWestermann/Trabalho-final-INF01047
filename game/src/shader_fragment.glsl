@@ -25,6 +25,7 @@ uniform mat4 projection;
 #define COIN 3
 #define REDBALL 4
 #define BLUEBALL 5
+#define ROCKET 6
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -37,6 +38,7 @@ uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
 uniform sampler2D TextureImage3;
 uniform sampler2D TextureImage4;
+uniform sampler2D TextureImage5;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -132,6 +134,14 @@ void main()
         vec3 lambert_diffuse_term = Kd * lambert;
 
         color.rgb = lambert_diffuse_term + vec3(0,0,0.2);
+        color.a = 1;
+    }
+    else if (object_id == ROCKET)
+    {
+        vec3 Kd = texture(TextureImage5, texcoords).rgb;
+        vec3 lambert_diffuse_term = Kd * lambert;
+
+        color.rgb = lambert_diffuse_term;
         color.a = 1;
     }
 
