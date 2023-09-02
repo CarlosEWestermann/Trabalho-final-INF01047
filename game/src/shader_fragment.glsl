@@ -94,29 +94,35 @@ void main()
     }
     else if (object_id == SPACESHIP)
     {
-        vec3 Kd1 = texture(TextureImage1, texcoords).rgb;
-        vec3 Kd2 = texture(TextureImage2, texcoords).rgb;
-        vec3 lambert_diffuse_term = (Kd1 + Kd2) * lambert;
+        vec3 Kd1 = texture(TextureImage1, texcoords).rgb; 
+        vec3 Kd2 = texture(TextureImage2, texcoords).rgb; 
+        vec3 Kd = (Kd1 + Kd2) / 2.0; 
 
-        color.rgb = lambert_diffuse_term;
-        color.a = 1;
-    }
+        vec3 Ks = vec3(0.6,0.6,0.6);  
+        vec3 Ka = vec3(0.2, 0.2, 0.2);
+        float q = 30.0;
 
-    else if (object_id == ASTEROID)
-    {
-        vec3 Kd = texture(TextureImage3, texcoords).rgb;
-        vec3 lambert_diffuse_term = Kd * lambert;
+        vec3 I = vec3(1.0,1.0,1.0);
+        vec3 Ia = vec3(0.2,0.2,0.2);
 
-        color.rgb = lambert_diffuse_term;
-        color.a = 1;
+        vec3 lambert_diffuse_term = Kd * I * max(0, dot(n, l));
+
+        vec3 ambient_term = Ka * Ia;
+
+        vec3 phong_specular_term = Ks * I * pow(max(0, dot(r, v)), q);
+        
+        color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term;
+        color.a = 1.0;
     }
     else if (object_id == COIN)
     {
-        vec3 Kd = texture(TextureImage4, texcoords).rgb;
-        vec3 lambert_diffuse_term = Kd * lambert;
+        vec3 Kd = texture(TextureImage4, texcoords).rgb;  
+        vec3 I = vec3(1.0, 1.0, 1.0);  
+
+        vec3 lambert_diffuse_term = Kd * I * max(0, dot(n, l));
 
         color.rgb = lambert_diffuse_term;
-        color.a = 1;
+        color.a = 1.0;
     }
     else if (object_id == REDBALL)
     {
@@ -133,6 +139,29 @@ void main()
 
         color.rgb = lambert_diffuse_term + vec3(0,0,0.2);
         color.a = 1;
+    }
+    if (object_id == ASTEROID)
+    {
+        vec4 h = normalize(l + v);
+        
+        float lambert = max(0.0, dot(n, l));
+        
+        float blinn_phong = pow(max(0.0, dot(n, h)), 20.0);
+
+        vec3 Kd = texture(TextureImage3, texcoords).rgb;
+        vec3 Ks = vec3(0.3, 0.3, 0.3);
+        vec3 Ka = vec3(0.0, 0.0, 0.0);
+        vec3 I = vec3(1.0, 1.0, 1.0);
+        vec3 Ia = vec3(0.2, 0.2, 0.2);
+        
+        vec3 lambert_diffuse_term = Kd * I * lambert;
+        
+        vec3 ambient_term = Ka * Ia;
+        
+        vec3 blinn_phong_specular_term = Ks * I * blinn_phong;
+        
+        color.rgb = lambert_diffuse_term + ambient_term + blinn_phong_specular_term;
+        color.a = 1.0;
     }
 
     // Cor final com correção gamma, considerando monitor sRGB.
