@@ -23,6 +23,8 @@ uniform mat4 projection;
 #define SPACESHIP 1
 #define ASTEROID 2
 #define COIN 3
+#define REDBALL 4
+#define BLUEBALL 5
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -67,17 +69,8 @@ void main()
     // Vetor que define o sentido da reflexão especular ideal.
     vec4 r = -l + 2*n*dot(n,l);
 
-    // Parâmetros que definem as propriedades espectrais da superfície
-    vec3 Kd; // Refletância difusa
-    vec3 Ks; // Refletância especular
-    vec3 Ka; // Refletância ambiente
-    float q; // Expoente especular para o modelo de iluminação de Phong
-    vec3 Ia; // Espectro da luz ambiente
     float lambert = max(0,dot(n,l));
-    vec3 lambert_diffuse_term = vec3(0,0,0);
     float phong = max(0,dot(r,v));
-    vec3 phong_specular_term = vec3(0,0,0);
-    vec3 ambient_term = vec3(0,0,0);
 
     if (object_id == SPHERE)
     {
@@ -90,33 +83,57 @@ void main()
         float U = (theta + M_PI)/(2*M_PI);
         float V = (phi + M_PI/2)/M_PI;
 
-        Kd = texture(TextureImage0, vec2(U,V)).rgb;
-        Ia = vec3(0.8,0.8,0.8);
+        vec3 Kd = texture(TextureImage0, vec2(U,V)).rgb;
+        vec3 Ia = vec3(0.8,0.8,0.8);
 
-        lambert_diffuse_term = Kd * lambert;
-        ambient_term = Kd * Ia;
+        vec3 lambert_diffuse_term = Kd * lambert;
+        vec3 ambient_term = Kd * Ia;
+
+        color.rgb = lambert_diffuse_term + ambient_term;
+        color.a = 1;
     }
     else if (object_id == SPACESHIP)
     {
-       vec3 Kd1 = texture(TextureImage1, texcoords).rgb;
-       vec3 Kd2 = texture(TextureImage2, texcoords).rgb;
-       lambert_diffuse_term = (Kd1 + Kd2) * lambert;
+        vec3 Kd1 = texture(TextureImage1, texcoords).rgb;
+        vec3 Kd2 = texture(TextureImage2, texcoords).rgb;
+        vec3 lambert_diffuse_term = (Kd1 + Kd2) * lambert;
+
+        color.rgb = lambert_diffuse_term;
+        color.a = 1;
     }
 
     else if (object_id == ASTEROID)
     {
-       vec3 Kd1 = texture(TextureImage3, texcoords).rgb;
-       lambert_diffuse_term = Kd1 * lambert;
+        vec3 Kd = texture(TextureImage3, texcoords).rgb;
+        vec3 lambert_diffuse_term = Kd * lambert;
+
+        color.rgb = lambert_diffuse_term;
+        color.a = 1;
     }
     else if (object_id == COIN)
     {
-        vec3 Kd1 = texture(TextureImage4, texcoords).rgb;
-       lambert_diffuse_term = Kd1 * lambert;
-    }
+        vec3 Kd = texture(TextureImage4, texcoords).rgb;
+        vec3 lambert_diffuse_term = Kd * lambert;
 
-    // Cor final do fragmento calculada com uma combinação dos termos difuso, especular, e ambiente.
-    color.rgb = lambert_diffuse_term + ambient_term + phong_specular_term;
-    color.a = 1;
+        color.rgb = lambert_diffuse_term;
+        color.a = 1;
+    }
+    else if (object_id == REDBALL)
+    {
+        vec3 Kd = texture(TextureImage3, texcoords).rgb;
+        vec3 lambert_diffuse_term = Kd * lambert;
+
+        color.rgb = lambert_diffuse_term + vec3(0.5,0,0);
+        color.a = 1;
+    }
+    else if (object_id == BLUEBALL)
+    {
+        vec3 Kd = texture(TextureImage3, texcoords).rgb;
+        vec3 lambert_diffuse_term = Kd * lambert;
+
+        color.rgb = lambert_diffuse_term + vec3(0,0,0.2);
+        color.a = 1;
+    }
 
     // Cor final com correção gamma, considerando monitor sRGB.
     color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);

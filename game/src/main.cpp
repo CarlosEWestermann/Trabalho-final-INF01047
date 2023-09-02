@@ -278,8 +278,8 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/universe.png");                       // TextureImage0
     LoadTextureImage("../../data/spaceshiptextures/emi.jpg");          // TextureImage1
     LoadTextureImage("../../data/spaceshiptextures/blender.jpg");      // TextureImage2
-    LoadTextureImage("../../data/asteroidtextures/rock_texture.jpg");      // TextureImage3
-    LoadTextureImage("../../data/cointextures/gold.png");    //TextureImage4
+    LoadTextureImage("../../data/asteroidtextures/rock_texture.jpg");  // TextureImage3
+    LoadTextureImage("../../data/cointextures/gold.png");              // TextureImage4
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -315,6 +315,15 @@ int main(int argc, char* argv[])
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
     char lastPressedKey;
+
+    float meteorStartTime = 0;
+    float meteorTime;
+    int meteorColor;
+
+    glm::vec4 bezierControlPoint1;
+    glm::vec4 bezierControlPoint2;
+    glm::vec4 bezierControlPoint3;
+    glm::vec4 bezierControlPoint4;
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -406,10 +415,9 @@ int main(int argc, char* argv[])
         }
         else
         {
-            // TO DO: CAMERA LOOK AT
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-            camera_position_c  = glm::vec4(0,0,-20,1.0f);              // Ponto "c", centro da câmera
-            camera_lookat_l    = glm::vec4(0.0f,0.0f,-1.0f,1.0f);       // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+            //camera_position_c  = glm::vec4(0,0,-100,1.0f);              // Ponto "c", centro da câmera
+            camera_lookat_l    = glm::vec4(0.0f,0.0f,-300.0f,1.0f);       // Ponto "l", para onde a câmera (look-at) estará sempre olhando
             camera_view_vector = camera_lookat_l - camera_position_c;  // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);       // Vetor "up" fixado para apontar para o "céu" (eito Y global)
         }
@@ -422,7 +430,7 @@ int main(int argc, char* argv[])
 
         // Note que, no sistema de coordenadas da câmera, os planos near e far estão no sentido negativo!
         float nearplane = -0.1f;                // Posição do "near plane"
-        float farplane  = -100.0f;               // Posição do "far plane"
+        float farplane  = -500.0f;               // Posição do "far plane"
         float field_of_view = 3.141592 / 3.0f;  // FOV PI/3 radianos = 60 graus
 
         // Projeção Perspectiva.
@@ -442,6 +450,8 @@ int main(int argc, char* argv[])
         #define SPACESHIP 1
         #define ASTEROID 2
         #define COIN 3
+        #define REDBALL 4
+        #define BLUEBALL 5
 
         glm::mat4 identity = Matrix_Identity();
         glm::mat4 model = Matrix_Identity();
@@ -480,6 +490,34 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_sphere");
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+
+        // Desenhamos vários meteoros
+        if (meteorStartTime == 0)
+        {
+            meteorStartTime = currentFrame;
+            meteorTime = 2 + (rand() % 5);
+            meteorColor = 4 + (rand() % 2);
+            bezierControlPoint1 = glm::vec4(-200 + rand() % 500, 300, -300.0f, 1);
+            bezierControlPoint2 = glm::vec4(-200 + rand() % 500, 100.0f, -300.0f, 1);
+            bezierControlPoint3 = glm::vec4(-200 + rand() % 500, -100.0f, -300.0f, 1);
+            bezierControlPoint4 = glm::vec4(-200 + rand() % 500, -300.0f, -300.0f, 1);
+        }
+        else
+        {
+            if (currentFrame - meteorStartTime >= meteorTime)
+            {
+                meteorStartTime = 0;
+            }
+            else
+            {
+                float t =  (1/meteorTime)*(currentFrame-meteorStartTime); // mapeia o intervalo [meteorStartTime, meteorStartTime + meteorTime] -> [0, 1]
+                glm::vec4 point_on_curve = (float)(pow(1-t,3))*bezierControlPoint1 + (float)(3*t*pow(1-t,2))*bezierControlPoint2 + (float)(3*pow(t,2)*(1-t))*bezierControlPoint3 + (float)(pow(t,3))*bezierControlPoint4;
+                model = Matrix_Translate(point_on_curve.x, point_on_curve.y, point_on_curve.z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                glUniform1i(g_object_id_uniform, meteorColor);
+                DrawVirtualObject("asteroid");
+            }
+        }
 
         // Desenhamos o modelo da moeda
         if(shouldRenderCoin[0]){
