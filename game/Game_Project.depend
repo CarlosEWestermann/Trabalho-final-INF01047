@@ -656,7 +656,7 @@
 	<array>
 	"mapbox/earcut.hpp"
 
-1693682705 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\main.cpp
+1693692546 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
@@ -677,7 +677,7 @@
 	<tiny_obj_loader.h>
 	<stb_image.h>
 	"utils.h"
-	"matrices.h"
+	"collisions.h"
 
 1692300254 c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\include\glm\gtc\type_ptr.hpp
 	"../gtc/quaternion.hpp"
@@ -938,10 +938,19 @@
 1692300256 c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\include\glm\gtc\type_ptr.inl
 	<cstring>
 
-1692300251 c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\include\matrices.h
+1693685767 c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\include\matrices.h
 	<cstdio>
 	<cstdlib>
 	<glm/mat4x4.hpp>
 	<glm/vec4.hpp>
 	<glm/gtc/matrix_transform.hpp>
+
+1693685767 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\collisions.cpp
+	"collisions.h"
+
+1693685767 c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\include\collisions.h
+	"matrices.h"
+
+1693685767 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\matrices.cpp
+	"matrices.h"
 

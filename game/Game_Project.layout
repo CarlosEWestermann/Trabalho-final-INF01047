@@ -2,9 +2,9 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="src\textrendering.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src\matrices.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4571" topLine="0" />
+			<Cursor1 position="2377" topLine="87" />
 		</Cursor>
 	</File>
 	<File name="include\tiny_obj_loader.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -12,38 +12,41 @@
 			<Cursor1 position="0" topLine="465" />
 		</Cursor>
 	</File>
-	<File name="src\main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="24834" topLine="468" />
-		</Cursor>
-		<Folding>
-			<Collapse line="46" />
-			<Collapse line="763" />
-			<Collapse line="822" />
-			<Collapse line="870" />
-			<Collapse line="917" />
-			<Collapse line="958" />
-			<Collapse line="971" />
-			<Collapse line="984" />
-			<Collapse line="1049" />
-			<Collapse line="1066" />
-			<Collapse line="1097" />
-			<Collapse line="1107" />
-			<Collapse line="1128" />
-			<Collapse line="1133" />
-			<Collapse line="1148" />
-			<Collapse line="1158" />
-			<Collapse line="1181" />
-			<Collapse line="1234" />
-			<Collapse line="1240" />
-			<Collapse line="1274" />
-			<Collapse line="1441" />
-			<Collapse line="1447" />
-		</Folding>
-	</File>
 	<File name="src\shader_fragment.glsl" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1249" topLine="19" />
+		</Cursor>
+	</File>
+	<File name="src\main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="24905" topLine="284" />
+		</Cursor>
+		<Folding>
+			<Collapse line="45" />
+			<Collapse line="784" />
+			<Collapse line="936" />
+			<Collapse line="976" />
+			<Collapse line="989" />
+			<Collapse line="992" />
+			<Collapse line="1121" />
+			<Collapse line="1126" />
+			<Collapse line="1153" />
+			<Collapse line="1155" />
+			<Collapse line="1163" />
+			<Collapse line="1193" />
+			<Collapse line="1245" />
+			<Collapse line="1264" />
+			<Collapse line="1298" />
+		</Folding>
+	</File>
+	<File name="src\textrendering.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4571" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="src\collisions.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="0" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

@@ -200,11 +200,11 @@ bool shouldRenderSphere[] = {
             true,
             true,
             true
-        };
+};
 
-        bool shouldRenderCoin[] = {
-            true
-        };
+bool shouldRenderCoin[] = {
+    true
+};
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// IMPLEMENTAÇÃO DAS FUNÇÕES //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -326,10 +326,15 @@ int main(int argc, char* argv[])
     float meteorTime;
     int meteorColor;
 
+    float rocketStartTime = 0;
+    float rocketTime = 5;
+
     glm::vec4 bezierControlPoint1;
     glm::vec4 bezierControlPoint2;
     glm::vec4 bezierControlPoint3;
     glm::vec4 bezierControlPoint4;
+
+    glm::vec4 rocketDirection = glm::vec4(-1,0,0,0);
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -422,7 +427,6 @@ int main(int argc, char* argv[])
         else
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-            //camera_position_c  = glm::vec4(0,0,-100,1.0f);              // Ponto "c", centro da câmera
             camera_lookat_l    = glm::vec4(0.0f,0.0f,-300.0f,1.0f);       // Ponto "l", para onde a câmera (look-at) estará sempre olhando
             camera_view_vector = camera_lookat_l - camera_position_c;  // Vetor "view", sentido para onde a câmera está virada
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);       // Vetor "up" fixado para apontar para o "céu" (eito Y global)
@@ -487,7 +491,7 @@ int main(int argc, char* argv[])
         BoundingCircle coinBoundingSpheres[] = {
             { coinCenter[0], 2.0f, coinNormal[0] }
         };
-
+/*
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
@@ -497,19 +501,39 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_sphere");
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
-
-
-        if (g_SpaceKeyPressed)
+*/
+        if (g_SpaceKeyPressed && !rocketStartTime)
         {
-            // Desenhamos o modelo do foguete
-            model = Matrix_Translate(0, 0, -15)*Matrix_Rotate_Y(0.1,0.1,0.1);
+            rocketStartTime = currentFrame;
+
+            // TO DO: arrumar isso daqui pra que o angulo quo o foguete parta seja o angulo da view da camera
+            camera_view_vector = camera_view_vector/norm(camera_view_vector);
+            rocketDirection = rocketDirection/norm(rocketDirection);
+
+            float angle = acos(dotproduct(camera_view_vector, rocketDirection));
+            glm::vec4 rotationAxis = crossproduct(camera_view_vector, rocketDirection);
+            rotationAxis = rotationAxis/norm(rotationAxis);
+
+            model = Matrix_Rotate(angle, rotationAxis); //  to usando a formula de rodrigues p tentar fazer isso, quem sabe tem outro jeito
             glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, ROCKET);
-            glDisable(GL_CULL_FACE);
             DrawVirtualObject("the_rocket");
-            glEnable(GL_CULL_FACE);
         }
-
+        else if (rocketStartTime)
+        {
+            if (currentFrame - rocketStartTime >= rocketTime)
+            {
+                rocketStartTime = 0;
+                g_SpaceKeyPressed = false;
+            }
+            else
+            {
+                // model = Matrix_Translate(,,); <- arrumar isso tb, ele tem que transalar na direção do vetor que ele partiu, e de acordo com o tempo
+                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                glUniform1i(g_object_id_uniform, ROCKET);
+                DrawVirtualObject("the_rocket");
+            }
+        }
 /*
         // Desenhamos vários meteoros
         if (meteorStartTime == 0)
@@ -546,7 +570,7 @@ int main(int argc, char* argv[])
             glUniform1i(g_object_id_uniform, COIN);
             DrawVirtualObject("the_coin");
         }
-        
+
 
         // Desenhamos os asteroides
 
