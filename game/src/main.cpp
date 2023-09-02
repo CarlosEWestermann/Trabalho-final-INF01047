@@ -32,10 +32,9 @@
 // Headers locais, definidos na pasta "include/"
 #include "utils.h"
 #include "matrices.h"
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// DEFINIÇÃO DE ESTRUTURAS /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+int globalBateu = 0;
 // Estrutura que representa um modelo geométrico carregado a partir de um arquivo ".obj".
 struct ObjModel
 {
@@ -100,6 +99,12 @@ struct SceneObject
     glm::vec3    bbox_min;                  // Axis-Aligned Bounding Box do objeto
     glm::vec3    bbox_max;
 };
+
+struct BoundingSphere {
+    glm::vec3 center;
+    float radius;
+};
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// CABEÇALHO DAS FUNÇÕES ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,6 +199,10 @@ bool g_DKeyPressed = false;
 #define CAMERA_ACCELERATION 1.0f
 #define MAX_CAMERA_SPEED 20.0f
 
+bool checkSphereCollision(BoundingSphere sphere1, BoundingSphere sphere2) {
+    float distance = glm::length(sphere1.center - sphere2.center); //dist um centro do outro
+    return distance <= (sphere1.radius + sphere2.radius); //verifica se tem intersecao
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// IMPLEMENTAÇÃO DAS FUNÇÕES //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -430,6 +439,13 @@ int main(int argc, char* argv[])
         glm::mat4 identity = Matrix_Identity(); // Transformação identidade de modelagem
         glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
 
+
+        glm::vec3 asteroidsCenter[] = { 
+            glm::vec3(0,10,-36),
+            glm::vec3(0,0,-18),
+            glm::vec3(18,30,-36)
+        };
+
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
@@ -440,10 +456,37 @@ int main(int argc, char* argv[])
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
-        model = Matrix_Translate(0,0,-18)*Matrix_Scale(1.0f/250.0f, 1.0f/250.0f, 1.0f/250.0f);
-        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, ASTEROID);
-        DrawVirtualObject("asteroid");
+
+        PushMatrix(model);
+
+            model = Matrix_Translate(asteroidsCenter[0].x, asteroidsCenter[0].y, asteroidsCenter[0].z);
+
+            model = model *Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, ASTEROID);
+            DrawVirtualObject("asteroid");
+
+        PopMatrix(model);
+
+        model = Matrix_Translate(asteroidsCenter[1].x, asteroidsCenter[1].y, asteroidsCenter[1].z);
+
+        PushMatrix(model);
+            model = model *Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, ASTEROID);
+            DrawVirtualObject("asteroid");
+
+        PopMatrix(model);
+
+        PushMatrix(model);
+
+            model = Matrix_Translate(asteroidsCenter[2].x, asteroidsCenter[2].y, asteroidsCenter[2].z);
+            model = model *Matrix_Scale(1.0f/150.0f, 1.0f/150.0f, 1.0f/150.0f);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, ASTEROID);
+            DrawVirtualObject("asteroid");
+
+        PopMatrix(model);
 
         // Desenhamos modelo da nave
 
@@ -453,6 +496,23 @@ int main(int argc, char* argv[])
         glUniform1i(g_object_id_uniform, SPACESHIP);
         DrawVirtualObject("the_spaceship");
 
+        //bounding spheres dos asteroids
+        BoundingSphere asteroidBoundingSpheres[] = {
+            { asteroidsCenter[0], 0.5f },
+            { asteroidsCenter[1], 0.5f },
+            { asteroidsCenter[2], 1.0f }
+        };
+        //bounding spheres da nave
+        BoundingSphere shipBoundingSphere  = { glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z - 18.0f), 1.0f };
+
+        //verifica nave vs cada asteroide
+        for(int i = 0; i < 3; ++i) {
+            if (checkSphereCollision(shipBoundingSphere, asteroidBoundingSpheres[i])) {
+                printf("%d - camera position = x:%f, y:%f, z:%f\n", globalBateu, camera_position_c.x, camera_position_c.y, camera_position_c.z);
+                globalBateu++;
+            }
+        }
+        
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////

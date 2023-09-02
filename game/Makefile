@@ -3,7 +3,7 @@
 
 # Your output and source files
 OUTPUT = ./bin/Linux/main
-SOURCES = src/main.cpp src/glad.c src/textrendering.cpp src/tiny_obj_loader.cpp src/stb_image.cpp
+SOURCES = src/main.cpp src/glad.c src/textrendering.cpp src/tiny_obj_loader.cpp src/stb_image.cpp 
 
 # Compiler Flags
 CXXFLAGS = -std=c++11 -Wall -Wno-unused-function -g -I ./include/
