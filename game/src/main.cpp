@@ -278,6 +278,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/spaceshiptextures/emi.jpg");          // TextureImage1
     LoadTextureImage("../../data/spaceshiptextures/blender.jpg");      // TextureImage2
     LoadTextureImage("../../data/asteroidtextures/rock_texture.jpg");      // TextureImage3
+    LoadTextureImage("../../data/cointextures/gold.png");    //TextureImage4
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -291,6 +292,10 @@ int main(int argc, char* argv[])
     ObjModel asteroidmodel("../../data/asteroid.obj");
     ComputeNormals(&asteroidmodel);
     BuildTrianglesAndAddToVirtualScene(&asteroidmodel);
+
+    ObjModel coinmodel("../../data/coin.obj");
+    ComputeNormals(&coinmodel);
+    BuildTrianglesAndAddToVirtualScene(&coinmodel);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,12 +372,12 @@ int main(int argc, char* argv[])
             if (g_AKeyPressed)
             {
                 lastPressedKey = 'A';
-                g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
             }
             if (g_DKeyPressed)
             {
                 lastPressedKey = 'D';
-                g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
             }
 
             if (!(g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed))
@@ -387,11 +392,11 @@ int main(int argc, char* argv[])
                 }
                 if (lastPressedKey == 'A')
                 {
-                    g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                    g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
                 }
                 if (lastPressedKey == 'D')
                 {
-                    g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime;
+                    g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
                 }
             }
             camera_position_c = glm::vec4(g_FreeCameraPosition, 1.0f);
@@ -435,6 +440,7 @@ int main(int argc, char* argv[])
         #define SPHERE 0
         #define SPACESHIP 1
         #define ASTEROID 2
+        #define COIN 3
 
         glm::mat4 identity = Matrix_Identity(); // Transformação identidade de modelagem
         glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem
@@ -442,7 +448,7 @@ int main(int argc, char* argv[])
 
         glm::vec3 asteroidsCenter[] = { 
             glm::vec3(0,10,-36),
-            glm::vec3(0,0,-18),
+            glm::vec3(10,10,-18),
             glm::vec3(18,30,-36)
         };
 
@@ -455,6 +461,11 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_sphere");
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+
+        model = Matrix_Translate(0, 0, -15);
+        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+        glUniform1i(g_object_id_uniform, COIN);
+        DrawVirtualObject("the_coin");
 
 
         PushMatrix(model);
@@ -498,20 +509,27 @@ int main(int argc, char* argv[])
 
         //bounding spheres dos asteroids
         BoundingSphere asteroidBoundingSpheres[] = {
-            { asteroidsCenter[0], 0.5f },
-            { asteroidsCenter[1], 0.5f },
-            { asteroidsCenter[2], 1.0f }
+            { asteroidsCenter[0], 2.5f },
+            { asteroidsCenter[1], 2.5f },
+            { asteroidsCenter[2], 5.0f }
         };
+
+        glm::vec3 shipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x* -18, camera_view_vector.y* -18, camera_view_vector.z* -18);
+
+        
+
         //bounding spheres da nave
-        BoundingSphere shipBoundingSphere  = { glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z - 18.0f), 1.0f };
+        BoundingSphere shipBoundingSphere  = { glm::vec3(shipPosition.x, shipPosition.y, shipPosition.z), 1.0f };
 
         //verifica nave vs cada asteroide
+        bool toggle = false;
         for(int i = 0; i < 3; ++i) {
-            if (checkSphereCollision(shipBoundingSphere, asteroidBoundingSpheres[i])) {
-                printf("%d - camera position = x:%f, y:%f, z:%f\n", globalBateu, camera_position_c.x, camera_position_c.y, camera_position_c.z);
-                globalBateu++;
+            if (checkSphereCollision(shipBoundingSphere, asteroidBoundingSpheres[i])) { 
+                toggle = true;
             }
         }
+
+        if(toggle) break;
         
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -642,6 +660,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage1"), 1);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage2"), 2);
     glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage3"), 3);
+    glUniform1i(glGetUniformLocation(g_GpuProgramID, "TextureImage4"), 4);
     glUseProgram(0);
 }
 
@@ -1052,7 +1071,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
                 g_Pitch = -89.0f;
 
             glm::vec3 front;
-            front.x = cos(glm::radians(g_Yaw)) * cos(glm::radians(g_Pitch));
+            front.x = cos(glm::radians(g_Yaw)) * cos(glm::radians(g_Pitch)); //TODO: PODE USAR ISSO?
             front.y = sin(glm::radians(g_Pitch));
             front.z = sin(glm::radians(g_Yaw)) * cos(glm::radians(g_Pitch));
             g_FreeCameraFront = glm::normalize(front);
