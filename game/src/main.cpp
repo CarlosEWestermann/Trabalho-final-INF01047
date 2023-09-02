@@ -31,7 +31,7 @@
 
 // Headers locais, definidos na pasta "include/"
 #include "utils.h"
-#include "matrices.h"
+#include "collisions.h"
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// DEFINIÇÃO DE ESTRUTURAS /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Estrutura que representa um modelo geométrico carregado a partir de um arquivo ".obj".
@@ -99,26 +99,6 @@ struct SceneObject
     glm::vec3    bbox_max;
 };
 
-struct BoundingSphere
-{
-    glm::vec3 center;
-    float radius;
-};
-
-struct BoundingCube
-{
-    glm::vec3 upperFrontRight;
-    glm::vec3 lowerBackLeft;
-};
-
-struct BoundingCircle
-{
-    glm::vec3 center;
-    float radius;
-    glm::vec3 normal;
-};
-
-int globalCount = 0;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// CABEÇALHO DAS FUNÇÕES ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -213,50 +193,7 @@ bool g_DKeyPressed = false;
 #define MAX_CAMERA_SPEED 20.0f
 
 // Teste de colisão: esfera-esfera
-bool checkSphereSphereCollision(BoundingSphere sphere1, BoundingSphere sphere2)
-{
-    float distance = glm::length(sphere1.center - sphere2.center); // dist um centro do outro
-    return distance <= (sphere1.radius + sphere2.radius);          // verifica se tem intersecao
-}
 
-// Teste de colisão: esfera-circulo
-bool checkSphereCircleCollision(BoundingSphere sphere, BoundingCircle circle)
-{
-    /* RASCUNHO
-    // para um ponto p estar contido na esfera:
-    glm::length(p - sphere.center) <= sphere.radius;
-    // para o mesmo ponto p estar contido no circulo:
-    glm::length(p - circle.center) <= circle.radius;
-    // E
-    dotproduct(p - circle.center, circle.normal) == 0  // o vetor (p - circle.center) é perpendicular a normal do circuloww
-    */
-    glm::vec3 distanceCenters = sphere.center - circle.center;
-    float distanceToPlane = std::abs(dotproduct(glm::vec4(distanceCenters.x, distanceCenters.y, distanceCenters.z, 0),
-                                                            glm::vec4(circle.normal.x, circle.normal.y, circle.normal.z, 0)));
-
-    if (distanceToPlane > sphere.radius)return false;
-
-    
-    glm::vec3 intersectionPoint = sphere.center - distanceToPlane * circle.normal;
-
-    float distanceToCircleCenter = glm::length(intersectionPoint - circle.center);
-    return distanceToCircleCenter <= circle.radius;
-}
-
-// Teste de colisão: esfera-cubo
-bool checkSphereCubeCollision(BoundingSphere sphere, BoundingCube cube)
-{
-    /* RASCUNHO
-    // para um ponto p estar contido na esfera:
-    glm::length(p - sphere.center) <= sphere.radius;
-    // para o mesmo ponto p tambem estar contido no cubo:
-    (p.x >= cube.lowerBackLeft.x && p.x <= cube.upperFrontRight.x)
-    // E
-    (p.y >= cube.lowerBackLeft.y && p.y <= cube.upperFrontRight.y)
-    // E
-    (p.z >= cube.lowerBackLeft.z && p.z <= cube.upperFrontRight.z)
-     */
-}
 
 bool shouldRenderSphere[] = {
             true,
@@ -516,7 +453,7 @@ int main(int argc, char* argv[])
         };
 
         glm::vec3 coinCenter[] = {
-            glm::vec3(0, 0, -15)
+            glm::vec3(0, 0, -50)
         };
 
         glm::vec3 coinNormal[] = {
@@ -546,7 +483,7 @@ int main(int argc, char* argv[])
 
         // Desenhamos o modelo da moeda
         if(shouldRenderCoin[0]){
-            model = Matrix_Translate(0, 0, -15)*Matrix_Scale(1,1,0.2);
+            model = Matrix_Translate(coinCenter[0].x, coinCenter[0].y, coinCenter[0].z)*Matrix_Scale(1,1,0.2);
             glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, COIN);
             DrawVirtualObject("the_coin");
