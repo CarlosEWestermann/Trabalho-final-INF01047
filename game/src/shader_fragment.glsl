@@ -142,7 +142,6 @@ void main()
         color.rgb = lambert_diffuse_term + vec3(0,0,0.2);
         color.a = 1;
     }
-<<<<<<< HEAD
     else if (object_id == ROCKET)
     {
         vec3 Kd = texture(TextureImage5, texcoords).rgb;
@@ -150,7 +149,7 @@ void main()
 
         color.rgb = lambert_diffuse_term;
         color.a = 1;
-=======
+    }
     else if (object_id == ASTEROID)
     {
         vec4 h = normalize(l + v);
@@ -173,7 +172,6 @@ void main()
 
         color.rgb = lambert_diffuse_term + ambient_term + blinn_phong_specular_term;
         color.a = 1.0;
->>>>>>> b6166c5ffb39578e1466d236b97fc29b455702c2
     }
 
     // Cor final com correção gamma, considerando monitor sRGB.
