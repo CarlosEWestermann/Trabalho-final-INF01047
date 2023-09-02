@@ -31,10 +31,9 @@
 
 // Headers locais, definidos na pasta "include/"
 #include "utils.h"
-#include "matrices.h"
+#include "collisions.h"
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// DEFINIÇÃO DE ESTRUTURAS /////////////////////////////////////////////////////////////////////////////////////////////////////////
-int globalBateu = 0;
 // Estrutura que representa um modelo geométrico carregado a partir de um arquivo ".obj".
 struct ObjModel
 {
@@ -98,25 +97,6 @@ struct SceneObject
     GLuint       vertex_array_object_id;    // ID do VAO onde estão armazenados os atributos do modelo
     glm::vec3    bbox_min;                  // Axis-Aligned Bounding Box do objeto
     glm::vec3    bbox_max;
-};
-
-struct BoundingSphere
-{
-    glm::vec3 center;
-    float radius;
-};
-
-struct BoundingCube
-{
-    glm::vec3 upperFrontRight;
-    glm::vec3 lowerBackLeft;
-};
-
-struct BoundingCircle
-{
-    glm::vec3 center;
-    float radius;
-    glm::vec3 normal;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,39 +194,17 @@ bool g_SpaceKeyPressed = false;
 #define MAX_CAMERA_SPEED 20.0f
 
 // Teste de colisão: esfera-esfera
-bool checkSphereSphereCollision(BoundingSphere sphere1, BoundingSphere sphere2)
-{
-    float distance = glm::length(sphere1.center - sphere2.center); // dist um centro do outro
-    return distance <= (sphere1.radius + sphere2.radius);          // verifica se tem intersecao
-}
 
-// Teste de colisão: esfera-circulo
-bool checkSphereCircleCollision(BoundingSphere sphere, BoundingCircle circle)
-{
-    /* RASCUNHO
-    // para um ponto p estar contido na esfera:
-    glm::length(p - sphere.center) <= sphere.radius;
-    // para o mesmo ponto p estar contido no circulo:
-    glm::length(p - circle.center) <= circle.radius;
-    // E
-    dotproduct(p - circle.center, circle.normal) == 0  // o vetor (p - circle.center) é perpendicular a normal do circuloww
-    */
-}
 
-// Teste de colisão: esfera-cubo
-bool checkSphereCubeCollision(BoundingSphere sphere, BoundingCube cube)
-{
-    /* RASCUNHO
-    // para um ponto p estar contido na esfera:
-    glm::length(p - sphere.center) <= sphere.radius;
-    // para o mesmo ponto p tambem estar contido no cubo:
-    (p.x >= cube.lowerBackLeft.x && p.x <= cube.upperFrontRight.x)
-    // E
-    (p.y >= cube.lowerBackLeft.y && p.y <= cube.upperFrontRight.y)
-    // E
-    (p.z >= cube.lowerBackLeft.z && p.z <= cube.upperFrontRight.z)
-     */
-}
+bool shouldRenderSphere[] = {
+            true,
+            true,
+            true
+        };
+
+        bool shouldRenderCoin[] = {
+            true
+        };
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// IMPLEMENTAÇÃO DAS FUNÇÕES //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -505,6 +463,30 @@ int main(int argc, char* argv[])
         glm::mat4 identity = Matrix_Identity();
         glm::mat4 model = Matrix_Identity();
 
+        glm::vec3 asteroidsCenter[] = {
+            glm::vec3(0,10,-36),
+            glm::vec3(10,10,-18),
+            glm::vec3(18,30,-36)
+        };
+
+        glm::vec3 coinCenter[] = {
+            glm::vec3(0, 0, -50)
+        };
+
+        glm::vec3 coinNormal[] = {
+            glm::vec3(0, 0, 0)
+        };
+
+        // bounding spheres dos asteroides
+        BoundingSphere asteroidBoundingSpheres[] = {
+            { asteroidsCenter[0], 0.5f },
+            { asteroidsCenter[1], 0.5f },
+            { asteroidsCenter[2], 2.0f }
+        };
+
+        BoundingCircle coinBoundingSpheres[] = {
+            { coinCenter[0], 2.0f, coinNormal[0] }
+        };
 
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z);
@@ -558,51 +540,44 @@ int main(int argc, char* argv[])
         }
 
         // Desenhamos o modelo da moeda
-        model = Matrix_Translate(0, 0, -15)*Matrix_Scale(1,1,0.2);
-        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, COIN);
-        DrawVirtualObject("the_coin");
+        if(shouldRenderCoin[0]){
+            model = Matrix_Translate(coinCenter[0].x, coinCenter[0].y, coinCenter[0].z)*Matrix_Scale(1,1,0.2);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, COIN);
+            DrawVirtualObject("the_coin");
+        }
+        
 
         // Desenhamos os asteroides
-        glm::vec3 asteroidsCenter[] = {
-            glm::vec3(0,10,-36),
-            glm::vec3(10,10,-18),
-            glm::vec3(18,30,-36)
-        };
-
-        // bounding spheres dos asteroides
-        BoundingSphere asteroidBoundingSpheres[] = {
-            { asteroidsCenter[0], 2.5f },
-            { asteroidsCenter[1], 2.5f },
-            { asteroidsCenter[2], 5.0f }
-        };
 
         model = Matrix_Identity();
 
         PushMatrix(model);
+            if(shouldRenderSphere[0]){
+                model = model*Matrix_Translate(asteroidsCenter[0].x, asteroidsCenter[0].y, asteroidsCenter[0].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                glUniform1i(g_object_id_uniform, ASTEROID);
+                DrawVirtualObject("asteroid");
+            }
+        PopMatrix(model);
 
-            model = model*Matrix_Translate(asteroidsCenter[0].x, asteroidsCenter[0].y, asteroidsCenter[0].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
-            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, ASTEROID);
-            DrawVirtualObject("asteroid");
+        PushMatrix(model);
+            if(shouldRenderSphere[1]){
+                model = model*Matrix_Translate(asteroidsCenter[1].x, asteroidsCenter[1].y, asteroidsCenter[1].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                glUniform1i(g_object_id_uniform, ASTEROID);
+                DrawVirtualObject("asteroid");
+            }
 
         PopMatrix(model);
 
         PushMatrix(model);
-            model = model*Matrix_Translate(asteroidsCenter[1].x, asteroidsCenter[1].y, asteroidsCenter[1].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
-            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, ASTEROID);
-            DrawVirtualObject("asteroid");
-
-        PopMatrix(model);
-
-        PushMatrix(model);
-
-            model = model*Matrix_Translate(asteroidsCenter[2].x, asteroidsCenter[2].y, asteroidsCenter[2].z)*Matrix_Scale(1.0f/150.0f, 1.0f/150.0f, 1.0f/150.0f);
-            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, ASTEROID);
-            DrawVirtualObject("asteroid");
-
+            if(shouldRenderSphere[2]){
+                model = model*Matrix_Translate(asteroidsCenter[2].x, asteroidsCenter[2].y, asteroidsCenter[2].z)*Matrix_Scale(1.0f/150.0f, 1.0f/150.0f, 1.0f/150.0f);
+                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                glUniform1i(g_object_id_uniform, ASTEROID);
+                DrawVirtualObject("asteroid");
+            }
         PopMatrix(model);
 
 
@@ -616,13 +591,19 @@ int main(int argc, char* argv[])
         glm::vec3 shipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x* -18, camera_view_vector.y* -18, camera_view_vector.z* -18);
 
         // Bounding spheres da nave
-        BoundingSphere shipBoundingSphere  = { glm::vec3(shipPosition.x, shipPosition.y, shipPosition.z), 1.0f };
+        BoundingSphere shipBoundingSphere  = { glm::vec3(shipPosition.x, shipPosition.y, shipPosition.z), 4.0f };
 
         // verifica nave (esfera) vs cada asteroide (esfera)
-        bool toggle = false;
+
         for(int i = 0; i < 3; ++i) {
             if (checkSphereSphereCollision(shipBoundingSphere, asteroidBoundingSpheres[i])) {
-                toggle = true;
+                shouldRenderSphere[i] = false;
+            }
+        }
+
+        for(int i = 0; i < 1; ++i) {
+            if (checkSphereCircleCollision(shipBoundingSphere, coinBoundingSpheres[i])) {
+                shouldRenderCoin[i] = false;
             }
         }
 */
