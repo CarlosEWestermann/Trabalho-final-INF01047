@@ -13,7 +13,7 @@ bool checkSphereCircleCollision(BoundingSphere sphere, BoundingCircle circle){
     glm::vec3 distanceCenters = sphere.center - circle.center;
     float distanceToPlaneSquared = dotproduct(glm::vec4(distanceCenters.x, distanceCenters.y, distanceCenters.z, 0),
                                                 glm::vec4(circle.normal.x, circle.normal.y, circle.normal.z, 0));
-    distanceToPlaneSquared *= distanceToPlaneSquared;  // Squaring to compare
+    distanceToPlaneSquared *= distanceToPlaneSquared;  
 
     if (distanceToPlaneSquared > sphere.radius * sphere.radius) return false;
 
