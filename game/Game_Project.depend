@@ -656,10 +656,11 @@
 	<array>
 	"mapbox/earcut.hpp"
 
-1693694595 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\main.cpp
+1693775115 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
+	<iostream>
 	<map>
 	<stack>
 	<string>
@@ -945,10 +946,10 @@
 	<glm/vec4.hpp>
 	<glm/gtc/matrix_transform.hpp>
 
-1693685767 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\collisions.cpp
+1693761707 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\collisions.cpp
 	"collisions.h"
 
-1693685767 c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\include\collisions.h
+1693761707 c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\include\collisions.h
 	"matrices.h"
 
 1693685767 source:c:\users\pedro\onedrive\pedro\estudos\ufrgs\quintosemestre\comp grafica\trabalho-final-inf01047\game\src\matrices.cpp

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 
 // Headers específicos de C++
 #include <map>
@@ -32,6 +33,8 @@
 // Headers locais, definidos na pasta "include/"
 #include "utils.h"
 #include "collisions.h"
+
+using namespace std;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// DEFINIÇÃO DE ESTRUTURAS /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Estrutura que representa um modelo geométrico carregado a partir de um arquivo ".obj".
@@ -127,6 +130,7 @@ void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow* window, glm::mat4 M,
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e outras informações do programa.
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
+void TextRendering_ShowStartGame(GLFWwindow* window);
 
 // Funções callback para comunicação com o sistema operacional e interação do usuário.
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -189,6 +193,10 @@ bool g_SKeyPressed = false;
 bool g_AKeyPressed = false;
 bool g_DKeyPressed = false;
 bool g_SpaceKeyPressed = false;
+bool g_StartGame = false;
+bool g_Reboot = false;
+float g_StartGameTime = 0;
+int g_nextCoin = 0;
 
 #define CAMERA_ACCELERATION 3.0f
 #define MAX_CAMERA_SPEED 20.0f
@@ -196,15 +204,11 @@ bool g_SpaceKeyPressed = false;
 // Teste de colisão: esfera-esfera
 
 
-bool shouldRenderSphere[] = {
-            true,
-            true,
-            true
-};
+#define NUM_ASTEROIDS 24
+#define NUM_COINS 12
+vector<bool> shouldRenderSphere(NUM_ASTEROIDS, true);
+vector<bool> shouldRenderCoin(NUM_COINS, true);
 
-bool shouldRenderCoin[] = {
-    true
-};
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////// IMPLEMENTAÇÃO DAS FUNÇÕES //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -337,6 +341,100 @@ int main(int argc, char* argv[])
 
     glm::vec4 rocketDirection = glm::vec4(-1,0,0,0);
 
+    float asteroidSpeed = 15;
+
+    glm::vec3 asteroidsCenter[] = {
+        glm::vec3(10, 5, -45),
+        glm::vec3(0, 10, -65),
+        glm::vec3(0, -15, -90),
+        glm::vec3(10, -5, -105),
+        glm::vec3(0, -20, -150),
+        glm::vec3(20, -10, -165),
+        glm::vec3(20, 10, -200),
+        glm::vec3(15, 0, -225),
+        glm::vec3(15, -10, -250),
+        glm::vec3(25, 10, -260),
+        glm::vec3(0, 0, -320),
+        glm::vec3(-10, -10, -340),
+        glm::vec3(-25, -30, -370),
+        glm::vec3(-45, -35, -390),
+        glm::vec3(-50, -55, -420),
+        glm::vec3(-30, -45, -440),
+        glm::vec3(-30, -35, -480),
+        glm::vec3(-20, -20, -500),
+        glm::vec3(-5, -25, -520),
+        glm::vec3(-15, -15, -540),
+        glm::vec3(-20, -5, -590),
+        glm::vec3(-20, -10, -620),
+        glm::vec3(0, -20, -630),
+        glm::vec3(-10, -15, -660)
+    };
+
+    BoundingSphere asteroidBoundingSpheres[] = {
+        { asteroidsCenter[0], 0.5f },
+        { asteroidsCenter[1], 0.5f },
+        { asteroidsCenter[2], 0.5f },
+        { asteroidsCenter[3], 0.5f },
+        { asteroidsCenter[4], 0.5f },
+        { asteroidsCenter[5], 0.5f },
+        { asteroidsCenter[6], 0.5f },
+        { asteroidsCenter[7], 0.5f },
+        { asteroidsCenter[8], 0.5f },
+        { asteroidsCenter[9], 0.5f },
+        { asteroidsCenter[10], 0.5f },
+        { asteroidsCenter[11], 0.5f },
+        { asteroidsCenter[12], 0.5f },
+        { asteroidsCenter[13], 0.5f },
+        { asteroidsCenter[14], 0.5f },
+        { asteroidsCenter[15], 0.5f },
+        { asteroidsCenter[16], 0.5f },
+        { asteroidsCenter[17], 0.5f },
+        { asteroidsCenter[18], 0.5f },
+        { asteroidsCenter[19], 0.5f },
+        { asteroidsCenter[20], 0.5f },
+        { asteroidsCenter[21], 0.5f },
+        { asteroidsCenter[22], 0.5f },
+        { asteroidsCenter[23], 0.5f }
+    };
+
+    glm::vec3 asteroidsGroup[] = {
+        glm::vec3(0,10,-36),
+        glm::vec3(10,10,-18),
+        glm::vec3(0,30,-36)
+    };
+
+    glm::vec3 coinCenter[] = {
+        glm::vec3(0, 5, -30),
+        glm::vec3(0, -5, -70),
+        glm::vec3(5, -20, -120),
+        glm::vec3(15, 0, -180),
+        glm::vec3(25, 10, -230),
+        glm::vec3(0, 0, -300),
+        glm::vec3(-20, -15, -350),
+        glm::vec3(-50, -60, -400),
+        glm::vec3(-30, -40, -460),
+        glm::vec3(-10, -20, -520),
+        glm::vec3(-30, 0, -580),
+        glm::vec3(0, -20, -660),
+    };
+
+    glm::vec3 coinNormal = glm::vec3(0, 0, 0);
+
+    BoundingCircle coinBoundingSpheres[] = {
+        { coinCenter[0], 2.0f, coinNormal },
+        { coinCenter[1], 2.0f, coinNormal },
+        { coinCenter[2], 2.0f, coinNormal },
+        { coinCenter[3], 2.0f, coinNormal },
+        { coinCenter[4], 2.0f, coinNormal },
+        { coinCenter[5], 2.0f, coinNormal },
+        { coinCenter[6], 2.0f, coinNormal },
+        { coinCenter[7], 2.0f, coinNormal },
+        { coinCenter[8], 2.0f, coinNormal },
+        { coinCenter[9], 2.0f, coinNormal },
+        { coinCenter[10], 2.0f, coinNormal },
+        { coinCenter[11], 2.0f, coinNormal }
+    };
+
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -468,207 +566,237 @@ int main(int argc, char* argv[])
         glm::mat4 identity = Matrix_Identity();
         glm::mat4 model = Matrix_Identity();
 
-        glm::vec3 asteroidsCenter[] = {
-            glm::vec3(0,10,-36),
-            glm::vec3(10,10,-18),
-            glm::vec3(18,30,-36)
-        };
-
-        glm::vec3 coinCenter[] = {
-            glm::vec3(0, 0, -50)
-        };
-
-        glm::vec3 coinNormal[] = {
-            glm::vec3(0, 0, 0)
-        };
-
-        // bounding spheres dos asteroides
-        BoundingSphere asteroidBoundingSpheres[] = {
-            { asteroidsCenter[0], 0.5f },
-            { asteroidsCenter[1], 0.5f },
-            { asteroidsCenter[2], 2.0f }
-        };
-
-        BoundingCircle coinBoundingSpheres[] = {
-            { coinCenter[0], 2.0f, coinNormal[0] }
-        };
-
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z);
-        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, SPHERE);
-        glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
-        DrawVirtualObject("the_sphere");
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-
-        glm::vec3 originalShipPosition;
-        glm::vec3 original_camera_view_vector;
-        glm::vec3 currentMissilePosition;
-        if (g_SpaceKeyPressed && !rocketStartTime)
+        if(g_StartGame)
         {
-            rocketStartTime = currentFrame;
-            camera_view_vector = camera_view_vector / norm(camera_view_vector);
-            original_camera_view_vector = camera_view_vector;
-            rocketDirection = rocketDirection / norm(rocketDirection);
-
-            originalShipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x * -18, camera_view_vector.y* -18, camera_view_vector.z* -18);;
-
-            float angle = acos(dotproduct(camera_view_vector, rocketDirection));
-            glm::vec4 rotationAxis = crossproduct(camera_view_vector, rocketDirection);
-            rotationAxis = rotationAxis / norm(rotationAxis);
-
-            glm::mat4 rotationMatrix = Matrix_Rotate(angle, rotationAxis);
-            glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x, originalShipPosition.y, originalShipPosition.z);
-            
-            model = translationMatrix * rotationMatrix;
-
+            // Desenhamos o modelo da esfera
+            model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z);
             glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, ROCKET);
-            DrawVirtualObject("the_rocket");
-        }
-        else if (rocketStartTime)
-        {
-            if (currentFrame - rocketStartTime >= rocketTime)
+            glUniform1i(g_object_id_uniform, SPHERE);
+            glDisable(GL_CULL_FACE);
+            glDisable(GL_DEPTH_TEST);
+            DrawVirtualObject("the_sphere");
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+
+            // Desenhamos o modelo do foguete
+            glm::vec3 originalShipPosition;
+            glm::vec3 original_camera_view_vector;
+            glm::vec3 currentMissilePosition;
+            if (g_SpaceKeyPressed && !rocketStartTime)
             {
-                rocketStartTime = 0;
-                g_SpaceKeyPressed = false;
-            }
-            else
-            {
-                float deltaTime = currentFrame - rocketStartTime;
-                glm::vec3 translation = original_camera_view_vector * (rocketSpeed * deltaTime);
-                
-                glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z );
-                currentMissilePosition = glm::vec3(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z);
-                model = translationMatrix;
+                rocketStartTime = currentFrame;
+                camera_view_vector = camera_view_vector / norm(camera_view_vector);
+                original_camera_view_vector = camera_view_vector;
+                rocketDirection = rocketDirection / norm(rocketDirection);
+
+                originalShipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x * -18, camera_view_vector.y* -18, camera_view_vector.z* -18);;
+
+                float angle = acos(dotproduct(camera_view_vector, rocketDirection));
+                glm::vec4 rotationAxis = crossproduct(camera_view_vector, rocketDirection);
+                rotationAxis = rotationAxis / norm(rotationAxis);
+
+                glm::mat4 rotationMatrix = Matrix_Rotate(angle, rotationAxis);
+                glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x, originalShipPosition.y, originalShipPosition.z);
+
+                model = translationMatrix * rotationMatrix;
 
                 glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
                 glUniform1i(g_object_id_uniform, ROCKET);
                 DrawVirtualObject("the_rocket");
             }
-        }
-
-        // Desenhamos vários meteoros
-        if (meteorStartTime == 0)
-        {
-            meteorStartTime = currentFrame;
-            meteorTime = 2 + (rand() % 5);  // sorteia entre 2 e 6 segundos
-            meteorColor = 4 + (rand() % 2); // sorteia entre REDBALL(4) e BLUEBALL(5)
-            bezierControlPoint1 = glm::vec4(-200 + rand() % 500, 300, -300.0f, 1);
-            bezierControlPoint2 = glm::vec4(-200 + rand() % 500, 100.0f, -300.0f, 1);
-            bezierControlPoint3 = glm::vec4(-200 + rand() % 500, -100.0f, -300.0f, 1);
-            bezierControlPoint4 = glm::vec4(-200 + rand() % 500, -300.0f, -300.0f, 1);
-        }
-        else
-        {
-            if (currentFrame - meteorStartTime >= meteorTime)
+            else if (rocketStartTime)
             {
-                meteorStartTime = 0;
+                if (currentFrame - rocketStartTime >= rocketTime)
+                {
+                    rocketStartTime = 0;
+                    g_SpaceKeyPressed = false;
+                }
+                else
+                {
+                    float deltaTime = currentFrame - rocketStartTime;
+                    glm::vec3 translation = original_camera_view_vector * (rocketSpeed * deltaTime);
+
+                    glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z );
+                    currentMissilePosition = glm::vec3(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z);
+                    model = translationMatrix;
+
+                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                    glUniform1i(g_object_id_uniform, ROCKET);
+                    DrawVirtualObject("the_rocket");
+                }
+            }
+
+            // Desenhamos vários meteoros
+            if (meteorStartTime == 0)
+            {
+                meteorStartTime = currentFrame;
+                meteorTime = 2 + (rand() % 5);  // sorteia entre 2 e 6 segundos
+                meteorColor = 4 + (rand() % 2); // sorteia entre REDBALL(4) e BLUEBALL(5)
+                bezierControlPoint1 = glm::vec4(-200 + rand() % 500, 300, -300.0f, 1);
+                bezierControlPoint2 = glm::vec4(-200 + rand() % 500, 100.0f, -300.0f, 1);
+                bezierControlPoint3 = glm::vec4(-200 + rand() % 500, -100.0f, -300.0f, 1);
+                bezierControlPoint4 = glm::vec4(-200 + rand() % 500, -300.0f, -300.0f, 1);
             }
             else
             {
-                float t =  (1/meteorTime)*(currentFrame-meteorStartTime); // mapeia o intervalo [meteorStartTime, meteorStartTime + meteorTime] -> [0, 1]
-                glm::vec4 point_on_curve = (float)(pow(1-t,3))*bezierControlPoint1 + (float)(3*t*pow(1-t,2))*bezierControlPoint2 + (float)(3*pow(t,2)*(1-t))*bezierControlPoint3 + (float)(pow(t,3))*bezierControlPoint4;
-                model = Matrix_Translate(point_on_curve.x, point_on_curve.y, point_on_curve.z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, meteorColor);
-                DrawVirtualObject("asteroid");
+                if (currentFrame - meteorStartTime >= meteorTime)
+                {
+                    meteorStartTime = 0;
+                }
+                else
+                {
+                    float t =  (1/meteorTime)*(currentFrame-meteorStartTime); // mapeia o intervalo [meteorStartTime, meteorStartTime + meteorTime] -> [0, 1]
+                    glm::vec4 point_on_curve = (float)(pow(1-t,3))*bezierControlPoint1 + (float)(3*t*pow(1-t,2))*bezierControlPoint2 + (float)(3*pow(t,2)*(1-t))*bezierControlPoint3 + (float)(pow(t,3))*bezierControlPoint4;
+                    model = Matrix_Translate(point_on_curve.x, point_on_curve.y, point_on_curve.z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                    glUniform1i(g_object_id_uniform, meteorColor);
+                    DrawVirtualObject("asteroid");
+                }
             }
-        }
 
-        // Desenhamos o modelo da moeda
-        if(shouldRenderCoin[0]){
-            model = Matrix_Translate(coinCenter[0].x, coinCenter[0].y, coinCenter[0].z)*Matrix_Scale(1,1,0.2);
+            // Desenhamos as moedas
+            for(int i = 0; i < NUM_COINS; ++i)
+            {
+                if(shouldRenderCoin[i])
+                {
+                    model = Matrix_Translate(coinCenter[i].x, coinCenter[i].y, coinCenter[i].z)*Matrix_Scale(1,1,0.2);
+                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                    glUniform1i(g_object_id_uniform, COIN);
+                    DrawVirtualObject("the_coin");
+                }
+            }
+
+            // Desenhamos os asteroides
+            for(int i = 0; i < NUM_ASTEROIDS; ++i)
+            {
+                if(shouldRenderSphere[i])
+                {
+                    model = Matrix_Translate(asteroidsCenter[i].x, asteroidsCenter[i].y, asteroidsCenter[i].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                    glUniform1i(g_object_id_uniform, ASTEROID);
+                    DrawVirtualObject("asteroid");
+                }
+            }
+
+
+            // Desenhamos 3 asteroides se movendo em grupo, desde o inicio
+            model = Matrix_Translate(-300+((currentFrame-g_StartGameTime)*asteroidSpeed),60,-300);
+
+            PushMatrix(model);
+                if(shouldRenderSphere[0]){
+                    model = model*Matrix_Translate(asteroidsGroup[0].x, asteroidsGroup[0].y, asteroidsGroup[0].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                    glUniform1i(g_object_id_uniform, ASTEROID);
+                    DrawVirtualObject("asteroid");
+                }
+            PopMatrix(model);
+
+            PushMatrix(model);
+                if(shouldRenderSphere[1]){
+                    model = model*Matrix_Translate(asteroidsGroup[1].x, asteroidsGroup[1].y, asteroidsGroup[1].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
+                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                    glUniform1i(g_object_id_uniform, ASTEROID);
+                    DrawVirtualObject("asteroid");
+                }
+
+            PopMatrix(model);
+
+            PushMatrix(model);
+                if(shouldRenderSphere[2]){
+                    model = model*Matrix_Translate(asteroidsGroup[2].x, asteroidsGroup[2].y, asteroidsGroup[2].z)*Matrix_Scale(1.0f/150.0f, 1.0f/150.0f, 1.0f/150.0f);
+                    glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                    glUniform1i(g_object_id_uniform, ASTEROID);
+                    DrawVirtualObject("asteroid");
+                }
+            PopMatrix(model);
+
+
+            // Desenhamos modelo da nave
+            model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592);
             glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-            glUniform1i(g_object_id_uniform, COIN);
-            DrawVirtualObject("the_coin");
-        }
+            glUniformMatrix4fv(g_view_uniform, 1, GL_FALSE, glm::value_ptr(identity));
+            glUniform1i(g_object_id_uniform, SPACESHIP);
+            DrawVirtualObject("the_spaceship");
+
+            glm::vec3 shipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x* -18, camera_view_vector.y* -18, camera_view_vector.z* -18);
 
 
-        // Desenhamos os asteroides
+            // Bounding spheres da nave
+            BoundingSphere shipBoundingSphere  = { glm::vec3(shipPosition.x, shipPosition.y, shipPosition.z), 4.0f };
 
-        model = Matrix_Identity();
+            // verifica foguete vs asteroides
+            if (rocketStartTime)
+            {
+                glm::vec3 cubeDimensions = glm::vec3(5.0f, 5.0f, 5.0f);
 
-        PushMatrix(model);
-            if(shouldRenderSphere[0]){
-                model = model*Matrix_Translate(asteroidsCenter[0].x, asteroidsCenter[0].y, asteroidsCenter[0].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, ASTEROID);
-                DrawVirtualObject("asteroid");
+                glm::vec3 lowerBackLeft =  currentMissilePosition - cubeDimensions * 0.5f;
+                glm::vec3 upperFrontRight = currentMissilePosition + cubeDimensions * 0.5f;
+
+                BoundingCube MissileBoundingSphere = { lowerBackLeft, upperFrontRight };
+
+                for(int i = 0; i < NUM_ASTEROIDS; ++i)
+                {
+                    if (checkSphereCubeCollision(asteroidBoundingSpheres[i], MissileBoundingSphere))
+                    {
+                        shouldRenderSphere[i] = false;
+                    }
+                }
             }
-        PopMatrix(model);
 
-        PushMatrix(model);
-            if(shouldRenderSphere[1]){
-                model = model*Matrix_Translate(asteroidsCenter[1].x, asteroidsCenter[1].y, asteroidsCenter[1].z)*Matrix_Scale(1.0f/300.0f, 1.0f/300.0f, 1.0f/300.0f);
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, ASTEROID);
-                DrawVirtualObject("asteroid");
+            // verifica nave vs asteroides
+            for(int i = 0; i < NUM_ASTEROIDS; ++i)
+            {
+                if (checkSphereSphereCollision(shipBoundingSphere, asteroidBoundingSpheres[i]))
+                {
+                    g_StartGame = false;
+                    g_Reboot = true;
+                    printf("Perdeu. Moedas coletadas: %d. Tempo: %2fs.\n", g_nextCoin, currentFrame-g_StartGameTime);
+                }
             }
 
-        PopMatrix(model);
-
-        PushMatrix(model);
-            if(shouldRenderSphere[2]){
-                model = model*Matrix_Translate(asteroidsCenter[2].x, asteroidsCenter[2].y, asteroidsCenter[2].z)*Matrix_Scale(1.0f/150.0f, 1.0f/150.0f, 1.0f/150.0f);
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, ASTEROID);
-                DrawVirtualObject("asteroid");
+            if (g_nextCoin < NUM_COINS)
+            {
+                // verifica nave vs próxima moeda
+                if (checkSphereCircleCollision(shipBoundingSphere, coinBoundingSpheres[g_nextCoin]))
+                {
+                    shouldRenderCoin[g_nextCoin] = false;
+                    g_nextCoin++;
+                }
             }
-        PopMatrix(model);
-
-
-        // Desenhamos modelo da nave
-        model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592);
-        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-        glUniformMatrix4fv(g_view_uniform, 1, GL_FALSE, glm::value_ptr(identity));
-        glUniform1i(g_object_id_uniform, SPACESHIP);
-        DrawVirtualObject("the_spaceship");
-
-        glm::vec3 shipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x* -18, camera_view_vector.y* -18, camera_view_vector.z* -18);
-        
-
-        // Bounding spheres da nave
-        BoundingSphere shipBoundingSphere  = { glm::vec3(shipPosition.x, shipPosition.y, shipPosition.z), 4.0f };
-
-        if (rocketStartTime){
-            glm::vec3 cubeDimensions = glm::vec3(5.0f, 5.0f, 5.0f);  // Replace with the actual dimensions
-
-            glm::vec3 lowerBackLeft =  currentMissilePosition - cubeDimensions * 0.5f;
-            glm::vec3 upperFrontRight = currentMissilePosition + cubeDimensions * 0.5f;
-
-            printf("%f, %f, %f -- %f, %f, %f \n", lowerBackLeft.x, lowerBackLeft.y, lowerBackLeft.z, upperFrontRight.x, upperFrontRight.y, upperFrontRight.z);
-
-            BoundingCube MissileBoundingSphere = { lowerBackLeft, upperFrontRight };
-
-            for(int i = 0; i < 3; ++i) {
-            if (checkSphereCubeCollision(asteroidBoundingSpheres[i], MissileBoundingSphere)) {
-                printf("bateu");
-                shouldRenderSphere[i] = false;
+            else
+            {
+                // se coletou todas as moedas, jogo termina
+                g_StartGame = false;
+                g_Reboot = true;
+                printf("Ganhou. Moedas coletadas: %d. Tempo: %2fs.\n", g_nextCoin, currentFrame-g_StartGameTime);
             }
         }
-        }
-        // verifica nave (esfera) vs cada asteroide (esfera)
-
-        for(int i = 0; i < 3; ++i) {
-            if (checkSphereSphereCollision(shipBoundingSphere, asteroidBoundingSpheres[i])) {
-                shouldRenderSphere[i] = false;
+        else
+        {
+            if (g_Reboot)
+            {
+                g_FreeCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+                g_FreeCameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+                g_FreeCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+                g_CameraSpeed = 0.5f;
+                g_Yaw = -90.0f;
+                g_Pitch = 0.0f;
+                g_nextCoin = 0;
+                meteorStartTime = 0;
+                rocketStartTime = 0;
+                shouldRenderSphere = vector<bool>(NUM_ASTEROIDS, true);
+                shouldRenderCoin = vector<bool>(NUM_COINS, true);
+                g_Reboot = false;
             }
         }
 
-        for(int i = 0; i < 1; ++i) {
-            if (checkSphereCircleCollision(shipBoundingSphere, coinBoundingSpheres[i])) {
-                shouldRenderCoin[i] = false;
-            }
-        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Imprimimos na tela informação sobre o número de quadros renderizados por segundo (frames per second).
         TextRendering_ShowFramesPerSecond(window);
+        TextRendering_ShowStartGame(window);
 
         // O framebuffer onde OpenGL executa as operações de renderização não é o mesmo que está sendo mostrado para o usuário, caso contrário
         // seria possível ver artefatos conhecidos como "screen tearing". A chamada abaixo faz a troca dos buffers, mostrando para o usuário
@@ -1266,6 +1394,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     {
         g_SpaceKeyPressed = true;
     }
+
+    // Se o usuário apertar enter
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && !g_StartGame)
+    {
+        g_StartGame = true;
+        g_StartGameTime = glfwGetTime();
+    }
 }
 
 // Definimos o callback para impressão de erros da GLFW no terminal
@@ -1306,6 +1441,21 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
     float charwidth = TextRendering_CharWidth(window);
 
     TextRendering_PrintString(window, buffer, 1.0f-(numchars + 1)*charwidth, 1.0f-lineheight, 1.0f);
+}
+
+// Escrevemos na tela o número de quadros renderizados por segundo (frames per second).
+void TextRendering_ShowStartGame(GLFWwindow* window)
+{
+    if (g_StartGame)
+        return;
+
+    static char  buffer[] = "Press ENTER to Start";
+    static int   numchars = 21;
+
+    float lineheight = TextRendering_LineHeight(window);
+    float charwidth = TextRendering_CharWidth(window);
+
+    TextRendering_PrintString(window, buffer, -numchars*charwidth, 2*lineheight, 2.0f);
 }
 
 // Função para debugging: imprime no terminal todas informações de um modelo geométrico carregado de um arquivo ".obj".
