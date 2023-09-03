@@ -8,12 +8,12 @@ As contribuições do Pedro envolvem:
 5. Posicionamento dos objetos para criação do mapa. 
 6. Implementação da lógica 
 
-As contribuições do Carlos envolvem:
-1.Testes de colisão esfera-esfera, esfera-cubo, esfera-plano(círculo).
-2. Câmera livre.
-3. Movimentação da nave, incluindo Barrel Roll.
-4. Modelos de iluminação e de interpolação.
-5. Modelagem dos asteroides.
+As contribuições do Carlos envolvem:\
+ 1.Testes de colisão esfera-esfera, esfera-cubo, esfera-plano(círculo).\
+ 2. Câmera livre.\
+ 3. Movimentação da nave, incluindo Barrel Roll.\
+ 4. Modelos de iluminação e de interpolação.\
+ 5. Modelagem dos asteroides.\
 
 Contribuições conjuntas:
 1. Texturas em todos objetos.
