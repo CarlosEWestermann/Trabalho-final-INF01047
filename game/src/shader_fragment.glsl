@@ -4,6 +4,8 @@
 // Neste exemplo, este atributo foi gerado pelo rasterizador como a
 // interpolação da posição global e a normal de cada vértice, definidas em
 // "shader_vertex.glsl" e "main.cpp".
+in vec4 color_gouraud;
+
 in vec4 position_world;
 in vec4 normal;
 
@@ -144,11 +146,7 @@ void main()
     }
     else if (object_id == ROCKET)
     {
-        vec3 Kd = texture(TextureImage5, texcoords).rgb;
-        vec3 lambert_diffuse_term = Kd * lambert;
-
-        color.rgb = lambert_diffuse_term;
-        color.a = 1;
+        color = color_gouraud;
     }
     else if (object_id == ASTEROID)
     {

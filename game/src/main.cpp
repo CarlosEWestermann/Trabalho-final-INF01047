@@ -182,8 +182,8 @@ glm::vec3 g_FreeCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 g_FreeCameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 g_FreeCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float g_CameraSpeed = 0.5f;
-float g_Yaw = -90.0f;
-float g_Pitch = 0.0f;
+float g_left_right_movement = -90.0f;
+float g_up_down_movement = 0.0f;
 bool g_WKeyPressed = false;
 bool g_SKeyPressed = false;
 bool g_AKeyPressed = false;
@@ -192,9 +192,12 @@ bool g_SpaceKeyPressed = false;
 
 #define CAMERA_ACCELERATION 3.0f
 #define MAX_CAMERA_SPEED 20.0f
+#define BARREL_ROLL_SPEED 3.0f
+#define TARGET_ANGLE 6.28f
 
-// Teste de colisão: esfera-esfera
-
+float barrelRollAngle = 0.0f;
+bool isRolling = false;
+int barrelRollDirection = 1;
 
 bool shouldRenderSphere[] = {
             true,
@@ -328,7 +331,7 @@ int main(int argc, char* argv[])
 
     float rocketStartTime = 0;
     float rocketTime = 5;
-    float rocketSpeed = 15;
+    float rocketSpeed = 11;
 
     glm::vec4 bezierControlPoint1;
     glm::vec4 bezierControlPoint2;
@@ -391,34 +394,43 @@ int main(int argc, char* argv[])
                 lastPressedKey = 'S';
                 g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront * deltaTime;
             }
-            if (g_AKeyPressed)
-            {
-                lastPressedKey = 'A';
-                g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
-            }
-            if (g_DKeyPressed)
-            {
-                lastPressedKey = 'D';
-                g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
-            }
 
-            if (!(g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed))
-            {
-                if (lastPressedKey == 'W')
+			if (!isRolling){
+                if (g_AKeyPressed)
                 {
+                    isRolling = true;
+                    barrelRollAngle = 0.0f;
+                    barrelRollDirection = -1;  
+                }
+                else if (g_DKeyPressed)
+                {
+                    isRolling = true;
+                    barrelRollAngle = 0.0f;
+                    barrelRollDirection = 1; 
+                }
+            }
+            
+			if (isRolling){
+                barrelRollAngle += deltaTime * BARREL_ROLL_SPEED * barrelRollDirection;
+                
+                if (TARGET_ANGLE - barrelRollAngle <= 0.01f and barrelRollDirection == 1){
+                    isRolling = false;
+                    barrelRollAngle = 0.0f;  
+                } else if (glm::abs(TARGET_ANGLE - barrelRollAngle) >= 12.56f and barrelRollDirection == -1){
+                    
+                    isRolling = false;
+                    barrelRollAngle = 0.0f;  
+                }
+            }
+            
+
+
+            if (!(g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed)){
+                if (lastPressedKey == 'W'){
                 g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront * deltaTime;
                 }
-                if (lastPressedKey == 'S')
-                {
+                if (lastPressedKey == 'S'){
                     g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront * deltaTime;
-                }
-                if (lastPressedKey == 'A')
-                {
-                    g_FreeCameraPosition -= glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
-                }
-                if (lastPressedKey == 'D')
-                {
-                    g_FreeCameraPosition += glm::normalize(glm::cross(g_FreeCameraFront, g_FreeCameraUp)) * g_CameraSpeed * deltaTime; //TODO: PODE USAR ESSAS FUNCOES?
                 }
             }
             camera_position_c = glm::vec4(g_FreeCameraPosition, 1.0f);
@@ -621,17 +633,25 @@ int main(int argc, char* argv[])
 
 
         // Desenhamos modelo da nave
-        model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592);
+        model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592)*Matrix_Rotate_Z(barrelRollAngle);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
         glUniformMatrix4fv(g_view_uniform, 1, GL_FALSE, glm::value_ptr(identity));
         glUniform1i(g_object_id_uniform, SPACESHIP);
         DrawVirtualObject("the_spaceship");
 
-        glm::vec3 shipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x* -18, camera_view_vector.y* -18, camera_view_vector.z* -18);
-        
+        float offsetValue = -1.5; //nave eh maior pra tras que pra frente, 
 
-        // Bounding spheres da nave
-        BoundingSphere shipBoundingSphere  = { glm::vec3(shipPosition.x, shipPosition.y, shipPosition.z), 4.0f };
+        glm::vec3 shipOffset = glm::vec3(camera_view_vector.x * offsetValue,
+                                       camera_view_vector.y * offsetValue,
+                                       camera_view_vector.z * offsetValue);
+
+
+        glm::vec3 shipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) 
+                                - glm::vec3(camera_view_vector.x * -18, camera_view_vector.y * -18, camera_view_vector.z * -18)
+                                + shipOffset;  
+
+
+        BoundingSphere shipBoundingSphere  = { shipPosition, 4.0f };
 
         if (rocketStartTime){
             glm::vec3 cubeDimensions = glm::vec3(5.0f, 5.0f, 5.0f);  // Replace with the actual dimensions
@@ -639,13 +659,10 @@ int main(int argc, char* argv[])
             glm::vec3 lowerBackLeft =  currentMissilePosition - cubeDimensions * 0.5f;
             glm::vec3 upperFrontRight = currentMissilePosition + cubeDimensions * 0.5f;
 
-            printf("%f, %f, %f -- %f, %f, %f \n", lowerBackLeft.x, lowerBackLeft.y, lowerBackLeft.z, upperFrontRight.x, upperFrontRight.y, upperFrontRight.z);
-
             BoundingCube MissileBoundingSphere = { lowerBackLeft, upperFrontRight };
 
             for(int i = 0; i < 3; ++i) {
             if (checkSphereCubeCollision(asteroidBoundingSpheres[i], MissileBoundingSphere)) {
-                printf("bateu");
                 shouldRenderSphere[i] = false;
             }
         }
@@ -1195,19 +1212,19 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 
         if (g_IsFreeCamera)
         {
-            g_Yaw += dx;
-            g_Pitch -= dy;
+            g_left_right_movement += dx;
+            g_up_down_movement -= dy;
 
-            if (g_Pitch > 89.0f)
-                g_Pitch = 89.0f;
-            if (g_Pitch < -89.0f)
-                g_Pitch = -89.0f;
+            if (g_up_down_movement > 89.0f)
+                g_up_down_movement = 89.0f;
+            if (g_up_down_movement < -89.0f)
+                g_up_down_movement = -89.0f;
 
             glm::vec3 front;
-            front.x = cos(glm::radians(g_Yaw)) * cos(glm::radians(g_Pitch)); //TODO: PODE USAR ISSO?
-            front.y = sin(glm::radians(g_Pitch));
-            front.z = sin(glm::radians(g_Yaw)) * cos(glm::radians(g_Pitch));
-            g_FreeCameraFront = glm::normalize(front);
+            front.x = cos(glm::radians(g_left_right_movement)) * cos(glm::radians(g_up_down_movement)); 
+            front.y = sin(glm::radians(g_up_down_movement));
+            front.z = sin(glm::radians(g_left_right_movement)) * cos(glm::radians(g_up_down_movement));
+            g_FreeCameraFront = front / norm(glm::vec4(front.x, front.y, front.z, 0));
         }
 
 		g_LastCursorPosX = xpos;
