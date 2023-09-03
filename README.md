@@ -1,4 +1,4 @@
-# Trabalho-final-INF01047\
+# Trabalho-final-INF01047
 
 As contribuições do Pedro envolvem: 
 1. Modelagem da nave, da esfera correspondente ao “universo”, dos mísseis e das moedas.
@@ -61,17 +61,17 @@ Trivialmente, todos objetos têm texturas mapeadas.
 Manual:
 
 
-Controles:
-W: Movimenta a câmera do jogador para frente no modo câmera livre.
-S: Movimenta a câmera do jogador para trás no modo câmera livre.
-A: Faz um “Barrel roll” para esquerda.
-D Faz um “Barrel roll” para direita.
-F: troca de câmera livre para look-at.
-Espaço: atira um míssil.
-Click + movimentar o mouse: movimenta a câmera para olhar na direção do mouse na câmera livre.
-ESC: fecha o jogo.
+Controles:\
+W: Movimenta a câmera do jogador para frente no modo câmera livre.\
+S: Movimenta a câmera do jogador para trás no modo câmera livre.\
+A: Faz um “Barrel roll” para esquerda.\
+D Faz um “Barrel roll” para direita.\
+F: troca de câmera livre para look-at.\
+Espaço: atira um míssil.\
+Click + movimentar o mouse: movimenta a câmera para olhar na direção do mouse na câmera livre.\
+ESC: fecha o jogo.\
 
-Objetivo do jogo:
+Objetivo do jogo:\
 	O objetivo do jogo é coletar todas as moedas do mapa sem que a nave colida com algum asteroide. As moedas devem ser coletadas em ordem, de forma que só é possível coletar a segunda após coletar a primeira. A cada coleta de moeda, a câmera look-at é posicionada na posição da moeda para que o jogador possa visualizar o que resta do mapa. Ao coletar todas as moedas, o jogador vence. Caso colida com um asteroide ele perde o jogo. Além disso, o jogador pode atirar mísseis contra os asteroides para destruí-los. 
 
 
