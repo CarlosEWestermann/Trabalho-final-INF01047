@@ -521,11 +521,9 @@ int main(int argc, char* argv[])
                 }
             }
 
-
-
             if (!(g_WKeyPressed || g_SKeyPressed || g_AKeyPressed || g_DKeyPressed)){
                 if (lastPressedKey == 'W'){
-                g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront * deltaTime;
+                    g_FreeCameraPosition += g_CameraSpeed * g_FreeCameraFront * deltaTime;
                 }
                 if (lastPressedKey == 'S'){
                     g_FreeCameraPosition -= g_CameraSpeed * g_FreeCameraFront * deltaTime;
