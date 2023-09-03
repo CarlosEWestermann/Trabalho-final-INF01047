@@ -1,10 +1,20 @@
 #version 330 core
 
+
 // Atributos de vértice recebidos como entrada ("in") pelo Vertex Shader.
 // Veja a função BuildTrianglesAndAddToVirtualScene() em "main.cpp".
 layout (location = 0) in vec4 model_coefficients;
 layout (location = 1) in vec4 normal_coefficients;
 layout (location = 2) in vec2 texture_coefficients;
+layout (location = 4) in vec4 color_coefficients;
+
+
+// Atributos de vértice que serão gerados como saída ("out") pelo Vertex Shader.
+// * Estes serão interpolados pelo rasterizador! * gerando, assim, valores
+// para cada fragmento, os quais serão recebidos como entrada pelo Fragment
+// Shader. Veja o arquivo "shader_fragment.glsl".
+out vec4 color_gouraud;
+
 
 // Matrizes computadas no código C++ e enviadas para a GPU
 uniform mat4 model;
@@ -12,13 +22,18 @@ uniform mat4 view;
 uniform mat4 projection;
 
 // Atributos de vértice que serão gerados como saída ("out") pelo Vertex Shader.
-// ** Estes serão interpolados pelo rasterizador! ** gerando, assim, valores
+// * Estes serão interpolados pelo rasterizador! * gerando, assim, valores
 // para cada fragmento, os quais serão recebidos como entrada pelo Fragment
 // Shader. Veja o arquivo "shader_fragment.glsl".
 out vec4 position_world;
 out vec4 position_model;
 out vec4 normal;
 out vec2 texcoords;
+
+uniform vec4 bbox_min;
+uniform vec4 bbox_max;
+
+uniform sampler2D TextureImage5;
 
 void main()
 {
@@ -63,5 +78,67 @@ void main()
 
     // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
     texcoords = texture_coefficients;
-}
 
+    // Obtemos a posição da câmera utilizando a inversa da matriz que define o
+    // sistema de coordenadas da câmera.
+    vec4 origin = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 camera_position = inverse(view) * origin;
+
+    // O fragmento atual é coberto por um ponto que percente à superfície de um
+    // dos objetos virtuais da cena. Este ponto, p, possui uma posição no
+    // sistema de coordenadas global (World coordinates). Esta posição é obtida
+    // através da interpolação, feita pelo rasterizador, da posição de cada
+    // vértice.
+
+
+    // Normal do fragmento atual, interpolada pelo rasterizador a partir das
+    // normais de cada vértice.
+    vec4 n = normalize(normal);
+
+    // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
+    vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
+
+    // Vetor que define o sentido da câmera em relação ao ponto atual.
+    vec4 v = normalize(camera_position - position_world);
+
+    // Vetor que define o sentido da reflexão especular ideal.
+    vec4 r = -l+(2*n*(dot(n,l))); 
+
+    // Parâmetros que definem as propriedades espectrais da superfície
+    vec3 Kd; 
+    vec3 Ks; 
+    vec3 Ka; 
+    float q; 
+
+    float minx = bbox_min.x;
+    float maxx = bbox_max.x;
+
+    float miny = bbox_min.y;
+    float maxy = bbox_max.y;
+
+    float minz = bbox_min.z;
+    float maxz = bbox_max.z;
+
+    // Coordenadas de textura U e V
+    float U = (position_model.x - minx)/(maxx - minx);
+    float V = (position_model.y - miny)/(maxy - miny);
+
+    Kd = vec3(0.5, 0.5, 0.5);
+    Ks = vec3(1.0, 1.0, 1.0);
+    Ka = vec3(0.2,0.2,0.2);
+    q = 10.0;
+
+    vec3 Kd1 = texture(TextureImage5, vec2(U,V)).rgb;       //disco
+
+    vec3 I = vec3(1.0,1.0,1.0); 
+
+    vec3 Ia = vec3(1.0, 1.0, 1.0);
+
+    vec3 lambert_diffuse_term = Kd*I*max(0,dot(n,l));
+
+    vec3 ambient_term = Ka*Ia;
+
+    vec3 phong_specular_term  = Ks*I*pow(max(0,dot(r,v)),q);
+
+    color_gouraud.rgb = Kd1 * (lambert_diffuse_term + ambient_term + phong_specular_term);
+}
