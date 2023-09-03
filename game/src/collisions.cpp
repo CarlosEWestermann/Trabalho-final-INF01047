@@ -1,5 +1,6 @@
 #include "collisions.h"
 
+// Teste de colisão: esferac-esfera
 bool checkSphereSphereCollision(BoundingSphere sphere1, BoundingSphere sphere2){
     float distance = glm::length(sphere1.center - sphere2.center); // dist um centro do outro
     return distance <= (sphere1.radius + sphere2.radius);          // verifica se tem intersecao
@@ -22,15 +23,32 @@ bool checkSphereCircleCollision(BoundingSphere sphere, BoundingCircle circle){
 
 // Teste de colisão: esfera-cubo
 bool checkSphereCubeCollision(BoundingSphere sphere, BoundingCube cube){
-    return true;
-    /* RASCUNHO
-    // para um ponto p estar contido na esfera:
-    glm::length(p - sphere.center) <= sphere.radius;
-    // para o mesmo ponto p tambem estar contido no cubo:
-    (p.x >= cube.lowerBackLeft.x && p.x <= cube.upperFrontRight.x)
-    // E
-    (p.y >= cube.lowerBackLeft.y && p.y <= cube.upperFrontRight.y)
-    // E
-    (p.z >= cube.lowerBackLeft.z && p.z <= cube.upperFrontRight.z)
-     */
+    glm::vec3 cubeCenter = getCubeCenter(cube);
+    float cubeSide = getCubeSide(cube);
+
+    float sphereXDistance = abs(sphere.center.x - cubeCenter.x);
+    float sphereYDistance = abs(sphere.center.y - cubeCenter.y);
+    float sphereZDistance = abs(sphere.center.z - cubeCenter.z);
+
+    if (sphereXDistance >= (cubeSide + sphere.radius)) return false;
+    if (sphereYDistance >= (cubeSide + sphere.radius)) return false; 
+    if (sphereZDistance >= (cubeSide + sphere.radius)) return false; 
+
+    if (sphereXDistance < (cubeSide)) return true;
+    if (sphereYDistance < (cubeSide)) return true; 
+    if (sphereZDistance < (cubeSide)) return true; 
+
+   float cornerDistance_sq = ((sphereXDistance - cubeSide) * (sphereXDistance - cubeSide)) +
+                         ((sphereYDistance - cubeSide) * (sphereYDistance - cubeSide)) +
+                         ((sphereZDistance - cubeSide) * (sphereZDistance - cubeSide));
+
+    return (cornerDistance_sq < (sphere.radius * sphere.radius));
+}
+
+glm::vec3 getCubeCenter(BoundingCube cube){
+    return (cube.lowerBackLeft + cube.upperFrontRight) * 0.5f;
+}
+
+float getCubeSide(BoundingCube cube){
+    return abs(cube.upperFrontRight.x - cube.lowerBackLeft.x);
 }

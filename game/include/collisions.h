@@ -25,6 +25,8 @@ struct BoundingCircle
 bool checkSphereSphereCollision(BoundingSphere sphere1, BoundingSphere sphere2);
 bool checkSphereCircleCollision(BoundingSphere sphere, BoundingCircle circle);
 bool checkSphereCubeCollision(BoundingSphere sphere, BoundingCube cube);
+glm::vec3 getCubeCenter(BoundingCube cube);
+float getCubeSide(BoundingCube cube);
 
 
 

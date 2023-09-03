@@ -328,6 +328,7 @@ int main(int argc, char* argv[])
 
     float rocketStartTime = 0;
     float rocketTime = 5;
+    float rocketSpeed = 15;
 
     glm::vec4 bezierControlPoint1;
     glm::vec4 bezierControlPoint2;
@@ -491,7 +492,7 @@ int main(int argc, char* argv[])
         BoundingCircle coinBoundingSpheres[] = {
             { coinCenter[0], 2.0f, coinNormal[0] }
         };
-/*
+
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(camera_position_c.x, camera_position_c.y, camera_position_c.z);
         glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
@@ -501,20 +502,28 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_sphere");
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
-*/
+
+        glm::vec3 originalShipPosition;
+        glm::vec3 original_camera_view_vector;
+        glm::vec3 currentMissilePosition;
         if (g_SpaceKeyPressed && !rocketStartTime)
         {
             rocketStartTime = currentFrame;
+            camera_view_vector = camera_view_vector / norm(camera_view_vector);
+            original_camera_view_vector = camera_view_vector;
+            rocketDirection = rocketDirection / norm(rocketDirection);
 
-            // TO DO: arrumar isso daqui pra que o angulo quo o foguete parta seja o angulo da view da camera
-            camera_view_vector = camera_view_vector/norm(camera_view_vector);
-            rocketDirection = rocketDirection/norm(rocketDirection);
+            originalShipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x * -18, camera_view_vector.y* -18, camera_view_vector.z* -18);;
 
             float angle = acos(dotproduct(camera_view_vector, rocketDirection));
             glm::vec4 rotationAxis = crossproduct(camera_view_vector, rocketDirection);
-            rotationAxis = rotationAxis/norm(rotationAxis);
+            rotationAxis = rotationAxis / norm(rotationAxis);
 
-            model = Matrix_Rotate(angle, rotationAxis); //  to usando a formula de rodrigues p tentar fazer isso, quem sabe tem outro jeito
+            glm::mat4 rotationMatrix = Matrix_Rotate(angle, rotationAxis);
+            glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x, originalShipPosition.y, originalShipPosition.z);
+            
+            model = translationMatrix * rotationMatrix;
+
             glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
             glUniform1i(g_object_id_uniform, ROCKET);
             DrawVirtualObject("the_rocket");
@@ -528,13 +537,19 @@ int main(int argc, char* argv[])
             }
             else
             {
-                // model = Matrix_Translate(,,); <- arrumar isso tb, ele tem que transalar na direção do vetor que ele partiu, e de acordo com o tempo
+                float deltaTime = currentFrame - rocketStartTime;
+                glm::vec3 translation = original_camera_view_vector * (rocketSpeed * deltaTime);
+                
+                glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z );
+                currentMissilePosition = glm::vec3(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z);
+                model = translationMatrix;
+
                 glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
                 glUniform1i(g_object_id_uniform, ROCKET);
                 DrawVirtualObject("the_rocket");
             }
         }
-/*
+
         // Desenhamos vários meteoros
         if (meteorStartTime == 0)
         {
@@ -613,10 +628,28 @@ int main(int argc, char* argv[])
         DrawVirtualObject("the_spaceship");
 
         glm::vec3 shipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x* -18, camera_view_vector.y* -18, camera_view_vector.z* -18);
+        
 
         // Bounding spheres da nave
         BoundingSphere shipBoundingSphere  = { glm::vec3(shipPosition.x, shipPosition.y, shipPosition.z), 4.0f };
 
+        if (rocketStartTime){
+            glm::vec3 cubeDimensions = glm::vec3(5.0f, 5.0f, 5.0f);  // Replace with the actual dimensions
+
+            glm::vec3 lowerBackLeft =  currentMissilePosition - cubeDimensions * 0.5f;
+            glm::vec3 upperFrontRight = currentMissilePosition + cubeDimensions * 0.5f;
+
+            printf("%f, %f, %f -- %f, %f, %f \n", lowerBackLeft.x, lowerBackLeft.y, lowerBackLeft.z, upperFrontRight.x, upperFrontRight.y, upperFrontRight.z);
+
+            BoundingCube MissileBoundingSphere = { lowerBackLeft, upperFrontRight };
+
+            for(int i = 0; i < 3; ++i) {
+            if (checkSphereCubeCollision(asteroidBoundingSpheres[i], MissileBoundingSphere)) {
+                printf("bateu");
+                shouldRenderSphere[i] = false;
+            }
+        }
+        }
         // verifica nave (esfera) vs cada asteroide (esfera)
 
         for(int i = 0; i < 3; ++i) {
@@ -630,7 +663,7 @@ int main(int argc, char* argv[])
                 shouldRenderCoin[i] = false;
             }
         }
-*/
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
