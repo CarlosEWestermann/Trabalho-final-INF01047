@@ -75,5 +75,18 @@ Objetivo do jogo:\
 	O objetivo do jogo é coletar todas as moedas do mapa sem que a nave colida com algum asteroide. As moedas devem ser coletadas em ordem, de forma que só é possível coletar a segunda após coletar a primeira. A cada coleta de moeda, a câmera look-at é posicionada na posição da moeda para que o jogador possa visualizar o que resta do mapa. Ao coletar todas as moedas, o jogador vence. Caso colida com um asteroide ele perde o jogo. Além disso, o jogador pode atirar mísseis contra os asteroides para destruí-los. 
 
 
+Como compilar:\
+
+Em ambiente linux:\
+Para compilar e executar este projeto no Linux, primeiro você precisa instalar\
+as bibliotecas necessárias.\ 
+Esse é normalmente suficiente em uma instalação de Linux Ubuntu:\
+
+	sudo apt-get install build-essential make libx11-dev libxrandr-dev \
+                     	libxinerama-dev libxcursor-dev libxcb1-dev libxext-dev \
+                     	libxrender-dev libxfixes-dev libxau-dev libxdmcp-dev
+		      
+
+Com as bibliotecas instaladas, em um terminal, navegue até o diretório ‘game’ do projeto e para compilar utilize o comando ‘make’ e para rodar, utilize ‘make run’.
 
 
