@@ -761,6 +761,7 @@ int main(int argc, char* argv[])
                 {
                     if (checkSphereCubeCollision(asteroidBoundingSpheres[i], MissileBoundingSphere))
                     {
+                        asteroidBoundingSpheres[i].center = glm::vec3(999.0f,999.0f, 999.0f); //'deleta' a esfera
                         shouldRenderSphere[i] = false;
                     }
                 }
