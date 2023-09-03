@@ -30,8 +30,6 @@ out vec4 position_model;
 out vec4 normal;
 out vec2 texcoords;
 
-uniform vec4 bbox_min;
-uniform vec4 bbox_max;
 
 uniform sampler2D TextureImage5;
 
@@ -89,46 +87,21 @@ void main()
     // sistema de coordenadas global (World coordinates). Esta posição é obtida
     // através da interpolação, feita pelo rasterizador, da posição de cada
     // vértice.
-
-
-    // Normal do fragmento atual, interpolada pelo rasterizador a partir das
-    // normais de cada vértice.
+    
     vec4 n = normalize(normal);
 
-    // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
     vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
 
-    // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - position_world);
 
-    // Vetor que define o sentido da reflexão especular ideal.
     vec4 r = -l+(2*n*(dot(n,l))); 
 
-    // Parâmetros que definem as propriedades espectrais da superfície
-    vec3 Kd; 
-    vec3 Ks; 
-    vec3 Ka; 
-    float q; 
+    vec3 Kd = vec3(0.5, 0.5, 0.5);
+    vec3 Ks = vec3(1.0, 1.0, 1.0);
+    vec3 Ka = vec3(0.2,0.2,0.2);
+    float q = 10.0;
 
-    float minx = bbox_min.x;
-    float maxx = bbox_max.x;
-
-    float miny = bbox_min.y;
-    float maxy = bbox_max.y;
-
-    float minz = bbox_min.z;
-    float maxz = bbox_max.z;
-
-    // Coordenadas de textura U e V
-    float U = (position_model.x - minx)/(maxx - minx);
-    float V = (position_model.y - miny)/(maxy - miny);
-
-    Kd = vec3(0.5, 0.5, 0.5);
-    Ks = vec3(1.0, 1.0, 1.0);
-    Ka = vec3(0.2,0.2,0.2);
-    q = 10.0;
-
-    vec3 Kd1 = texture(TextureImage5, vec2(U,V)).rgb;       //disco
+    vec3 Kd1 = texture(TextureImage5, texcoords).rgb; 
 
     vec3 I = vec3(1.0,1.0,1.0); 
 

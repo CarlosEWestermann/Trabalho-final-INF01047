@@ -3,9 +3,8 @@
 // Teste de colisão: esferac-esfera
 bool checkSphereSphereCollision(BoundingSphere sphere1, BoundingSphere sphere2){
     glm::vec3 delta = sphere1.center - sphere2.center;
-    float distanceSquared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
-    float radiusSum = sphere1.radius + sphere2.radius;
-    return distanceSquared <= radiusSum * radiusSum;
+    float distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+    return distance <= (sphere1.radius + sphere2.radius) * (sphere1.radius + sphere2.radius);
 }
 
 // Teste de colisão: esfera-circulo
@@ -24,7 +23,7 @@ bool checkSphereCircleCollision(BoundingSphere sphere, BoundingCircle circle){
     return distanceToCircleCenterSquared <= circle.radius * circle.radius;
 }
 
-// Teste de colisão: esfera-cubo
+// Teste de colisão: esfera-cubo -> FONTE: modificado de https://stackoverflow.com/questions/27517250/sphere-cube-collision-detection-in-opengl
 bool checkSphereCubeCollision(BoundingSphere sphere, BoundingCube cube){
     glm::vec3 cubeCenter = getCubeCenter(cube);
     float cubeSide = getCubeSide(cube);
