@@ -723,11 +723,14 @@ int main(int argc, char* argv[])
             PopMatrix(model);
 
             // Desenhamos modelo da nave
-            model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592);
-            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-            glUniformMatrix4fv(g_view_uniform, 1, GL_FALSE, glm::value_ptr(identity));
-            glUniform1i(g_object_id_uniform, SPACESHIP);
-            DrawVirtualObject("the_spaceship");
+            if (g_IsFreeCamera){
+                model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592)*Matrix_Rotate_Z(barrelRollAngle);;
+                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                glUniformMatrix4fv(g_view_uniform, 1, GL_FALSE, glm::value_ptr(identity));
+                glUniform1i(g_object_id_uniform, SPACESHIP);
+                DrawVirtualObject("the_spaceship");
+            }
+            
 
             float offsetValue = -1.5; //nave eh maior pra tras que pra frente,
 
@@ -752,7 +755,7 @@ int main(int argc, char* argv[])
 
                 BoundingCube MissileBoundingSphere = { lowerBackLeft, upperFrontRight };
 
-                for(int i = 0; i < 3; ++i)
+                for(int i = 0; i < NUM_ASTEROIDS; ++i)
                 {
                     if (checkSphereCubeCollision(asteroidBoundingSpheres[i], MissileBoundingSphere))
                     {
