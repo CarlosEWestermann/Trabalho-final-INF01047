@@ -95,4 +95,13 @@ Tambem e possivel acessar o binario compilado em game/bin/linux/
 ### Ship Barrel roll:
 ![Alt](/images/flip.png "Ship Barrel roll")
 
+### Start screen:
+![Alt](/images/start.png "Start screnn")
+
+### lookat view:
+![Alt](/images/lookat.png "lookat view")
+
+### initial ship view:
+![Alt](/images/map.png "initial ship view")
+
 
