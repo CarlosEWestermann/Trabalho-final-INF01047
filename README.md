@@ -55,7 +55,7 @@ Para desenvolver este projeto, nós dividimos as tarefas de forma balanceada par
 
 ## Uso dos conceitos de Computação Gráfica:
 Para implementar a chuva de meteoros, utilizamos curvas de bézier cúbicas definidas a partir de pontos de controle com um certo nível de aleatoriedade, para que os meteoros tenham cursos diferentes.
-Para implementar o deslocamento em conjunto de um grupo de asteroides, utilizamos instâncias definidas a partir de um mesmo  , que translada
+Para implementar o deslocamento em conjunto de um grupo de asteroides, utilizamos instâncias definidas a partir de uma mesma matriz de modelagem base, que translada para a direita com o passar do tempo.
 Para implementar os objetos que se movem durante o jogo, como por exemplo o player e os tiros, calculamos as animações baseadas em um delta de tempo, de forma que ocorrem sempre na mesma velocidade independente da velocidade da CPU.
 Para implementar a visão do player padrão, utilizamos a câmera livre, e para a visão da pista, utilizamos a câmera look-at.
 Para implementar o foguete, utilizamos a interpolação de Gouraud e para os demais objetos utilizamos de Phong.
