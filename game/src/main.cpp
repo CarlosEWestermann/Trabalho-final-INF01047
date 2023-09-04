@@ -424,18 +424,18 @@ int main(int argc, char* argv[])
     glm::vec3 coinNormal = glm::vec3(0, 0, 0);
 
     BoundingCircle coinBoundingSpheres[] = {
-        { coinCenter[0], 2.0f, coinNormal },
-        { coinCenter[1], 2.0f, coinNormal },
-        { coinCenter[2], 2.0f, coinNormal },
-        { coinCenter[3], 2.0f, coinNormal },
-        { coinCenter[4], 2.0f, coinNormal },
-        { coinCenter[5], 2.0f, coinNormal },
-        { coinCenter[6], 2.0f, coinNormal },
-        { coinCenter[7], 2.0f, coinNormal },
-        { coinCenter[8], 2.0f, coinNormal },
-        { coinCenter[9], 2.0f, coinNormal },
-        { coinCenter[10], 2.0f, coinNormal },
-        { coinCenter[11], 2.0f, coinNormal }
+        { coinCenter[0], 2.5f, coinNormal },
+        { coinCenter[1], 2.5f, coinNormal },
+        { coinCenter[2], 2.5f, coinNormal },
+        { coinCenter[3], 2.5f, coinNormal },
+        { coinCenter[4], 2.5f, coinNormal },
+        { coinCenter[5], 2.5f, coinNormal },
+        { coinCenter[6], 2.5f, coinNormal },
+        { coinCenter[7], 2.5f, coinNormal },
+        { coinCenter[8], 2.5f, coinNormal },
+        { coinCenter[9], 2.5f, coinNormal },
+        { coinCenter[10], 2.5f, coinNormal },
+        { coinCenter[11], 2.5f, coinNormal }
     };
 
     // Ficamos em um loop infinito, renderizando, até que o usuário feche a janela
@@ -590,49 +590,51 @@ int main(int argc, char* argv[])
             glm::vec3 originalShipPosition;
             glm::vec3 original_camera_view_vector;
             glm::vec3 currentMissilePosition;
-            if (g_SpaceKeyPressed && !rocketStartTime)
-            {
-                rocketStartTime = currentFrame;
-                camera_view_vector = camera_view_vector / norm(camera_view_vector);
-                original_camera_view_vector = camera_view_vector;
-                rocketDirection = rocketDirection / norm(rocketDirection);
-
-                originalShipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x * -18, camera_view_vector.y* -18, camera_view_vector.z* -18);;
-
-                float angle = acos(dotproduct(camera_view_vector, rocketDirection));
-                glm::vec4 rotationAxis = crossproduct(camera_view_vector, rocketDirection);
-                rotationAxis = rotationAxis / norm(rotationAxis);
-
-                glm::mat4 rotationMatrix = Matrix_Rotate(angle, rotationAxis);
-                glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x, originalShipPosition.y, originalShipPosition.z);
-
-                model = translationMatrix * rotationMatrix;
-
-                glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
-                glUniform1i(g_object_id_uniform, ROCKET);
-                DrawVirtualObject("the_rocket");
-            }
-            else if (rocketStartTime)
-            {
-                if (currentFrame - rocketStartTime >= rocketTime)
+            if (g_IsFreeCamera){
+                if (g_SpaceKeyPressed && !rocketStartTime)
                 {
-                    rocketStartTime = 0;
-                    g_SpaceKeyPressed = false;
-                }
-                else
-                {
-                    float deltaTime = currentFrame - rocketStartTime;
-                    glm::vec3 translation = original_camera_view_vector * (rocketSpeed * deltaTime);
+                    rocketStartTime = currentFrame;
+                    camera_view_vector = camera_view_vector / norm(camera_view_vector);
+                    original_camera_view_vector = camera_view_vector;
+                    rocketDirection = rocketDirection / norm(rocketDirection);
 
-                    glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z );
-                    currentMissilePosition = glm::vec3(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z);
-                    model = translationMatrix;
+                    originalShipPosition = glm::vec3(camera_position_c.x, camera_position_c.y, camera_position_c.z) - glm::vec3(camera_view_vector.x * -18, camera_view_vector.y* -18, camera_view_vector.z* -18);;
+
+                    float angle = acos(dotproduct(camera_view_vector, rocketDirection));
+                    glm::vec4 rotationAxis = crossproduct(camera_view_vector, rocketDirection);
+                    rotationAxis = rotationAxis / norm(rotationAxis);
+
+                    glm::mat4 rotationMatrix = Matrix_Rotate(angle, rotationAxis);
+                    glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x, originalShipPosition.y, originalShipPosition.z);
+
+                    model = translationMatrix * rotationMatrix;
 
                     glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
                     glUniform1i(g_object_id_uniform, ROCKET);
                     DrawVirtualObject("the_rocket");
                 }
-            }
+                else if (rocketStartTime)
+                {
+                    if (currentFrame - rocketStartTime >= rocketTime)
+                    {
+                        rocketStartTime = 0;
+                        g_SpaceKeyPressed = false;
+                    }
+                    else
+                    {
+                        float deltaTime = currentFrame - rocketStartTime;
+                        glm::vec3 translation = original_camera_view_vector * (rocketSpeed * deltaTime);
+
+                        glm::mat4 translationMatrix = Matrix_Translate(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z );
+                        currentMissilePosition = glm::vec3(originalShipPosition.x + translation.x, originalShipPosition.y + translation.y, originalShipPosition.z + translation.z);
+                        model = translationMatrix;
+
+                        glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
+                        glUniform1i(g_object_id_uniform, ROCKET);
+                        DrawVirtualObject("the_rocket");
+                    }
+                }
+            }    
 
             // Desenhamos vários meteoros
             if (meteorStartTime == 0)
@@ -797,6 +799,7 @@ int main(int argc, char* argv[])
         {
             if (g_Reboot)
             {
+                g_IsFreeCamera = true;
                 g_FreeCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
                 g_FreeCameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
                 g_FreeCameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
