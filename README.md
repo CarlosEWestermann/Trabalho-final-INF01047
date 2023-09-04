@@ -89,6 +89,10 @@ Esse é normalmente suficiente em uma instalação de Linux Ubuntu:\
 
 Com as bibliotecas instaladas, em um terminal, navegue até o diretório ‘game’ do projeto e para compilar utilize o comando ‘make’ e para rodar, utilize ‘make run’.\
 
-Tambem e possivel acessar o binario compilado em game/bin/linux/\
+Tambem e possivel acessar o binario compilado em game/bin/linux/
+
+
+### Ship Barrel roll:
+![Alt](/images/flip.png "Ship Barrel roll")
 
 
