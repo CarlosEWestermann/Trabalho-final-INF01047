@@ -1,23 +1,23 @@
 # Trabalho-final-INF01047
 
-As contribuições do Pedro envolvem: 
-1. Modelagem da nave, da esfera correspondente ao “universo”, dos mísseis e das moedas.
-2. Animação dos meteoros utilizando curvas de bézier cúbicas.
-3. Animação dos asteroides se movendo em conjunto. 
-4. Câmera look-at.
-5. Posicionamento dos objetos para criação do mapa. 
-6. Implementação da lógica 
+### As contribuições do Pedro envolvem: 
+- Modelagem da nave, da esfera correspondente ao “universo”, dos mísseis e das moedas.
+- Animação dos meteoros utilizando curvas de bézier cúbicas.
+- Animação dos asteroides se movendo em conjunto. 
+- Câmera look-at.
+- Posicionamento dos objetos para criação do mapa. 
+- Implementação da lógica 
 
-As contribuições do Carlos envolvem:\
- 1.Testes de colisão esfera-esfera, esfera-cubo, esfera-plano(círculo).\
- 2. Câmera livre.\
- 3. Movimentação da nave, incluindo Barrel Roll.\
- 4. Modelos de iluminação e de interpolação.\
- 5. Modelagem dos asteroides.\
+### As contribuições do Carlos envolvem:
+- Testes de colisão esfera-esfera, esfera-cubo, esfera-plano(círculo).
+- Câmera livre.
+- Movimentação da nave, incluindo Barrel Roll.
+- Modelos de iluminação e de interpolação.
+- Modelagem dos asteroides.
 
-Contribuições conjuntas:
-1. Texturas em todos objetos.
-2. Animação dos mísseis.
+### Contribuições conjuntas:
+- Texturas em todos objetos.
+- Animação dos mísseis.
 
 Utilizamos o chatgpt em alguns momentos pontuais durante o desenvolvimento do código para tentar auxiliar a entender o porquê algo não funcionava, como por exemplo durante o desenvolvimento da câmera livre. De forma geral, para gerar código a ferramenta não foi muito útil, visto que não aproveitamos quase nada do que ela sugeriu. Por outro lado, ela foi capaz de auxiliar a entender possíveis motivos para algo não funcionar, assim como descrições matemáticas, como na colisão esfera-plano em que a sugestão de como calcular a distância de um ponto para o plano fazia sentido. De forma geral, as respostas não são consistentes e é necessário analisar as respostas que ele entrega. Para escrever código a ferramenta não foi útil, mas para a análise de erros foi.
 
@@ -30,7 +30,7 @@ Utilizamos o chatgpt em alguns momentos pontuais durante o desenvolvimento do c�
 
 
 
-Processo de desenvolvimento
+## Processo de desenvolvimento:
 
 Iniciamos o processo de desenvolvimento com base no Laboratório 5, que já apresentava uma implementação para o mapeamento de texturas em uma esfera. Nossa primeira tarefa consistiu em reaproveitar o código para construir o plano de fundo do jogo, utilizando uma textura de estrelas.
 Os próximos passos envolveram a modelagem dos objetos, incluindo a nave, os asteroides, as moedas e os mísseis. Aqui, a parte complicada foi encontrar os modelos gratuitos na internet que satisfaziam nossos interesses.
@@ -44,7 +44,7 @@ Para desenvolver este projeto, nós dividimos as tarefas de forma balanceada par
 
 
 
-Uso dos conceitos de Computação Gráfica
+## Uso dos conceitos de Computação Gráfica:
 
 
 Para implementar a chuva de meteoros, utilizamos curvas de bézier cúbicas definidas a partir de pontos de controle com um certo nível de aleatoriedade, para que os meteoros tenham cursos diferentes.
@@ -58,10 +58,10 @@ Os barrel rolls controlados pelo usuário aplicam transformações geométricas 
 A malha poligonal da nave é composta por 55.120 triângulos, que a faz mais complexa do que a da cow.obj.
 Trivialmente, todos objetos têm texturas mapeadas.
 
-Manual:
+## Manual:
 
 
-Controles:\
+### Controles:
 W: Movimenta a câmera do jogador para frente no modo câmera livre.\
 S: Movimenta a câmera do jogador para trás no modo câmera livre.\
 A: Faz um “Barrel roll” para esquerda.\
@@ -71,13 +71,13 @@ Espaço: atira um míssil.\
 Click + movimentar o mouse: movimenta a câmera para olhar na direção do mouse na câmera livre.\
 ESC: fecha o jogo.\
 
-Objetivo do jogo:\
-	O objetivo do jogo é coletar todas as moedas do mapa sem que a nave colida com algum asteroide. As moedas devem ser coletadas em ordem, de forma que só é possível coletar a segunda após coletar a primeira. A cada coleta de moeda, a câmera look-at é posicionada na posição da moeda para que o jogador possa visualizar o que resta do mapa. Ao coletar todas as moedas, o jogador vence. Caso colida com um asteroide ele perde o jogo. Além disso, o jogador pode atirar mísseis contra os asteroides para destruí-los. 
+### Objetivo do jogo:
+O objetivo do jogo é coletar todas as moedas do mapa sem que a nave colida com algum asteroide. As moedas devem ser coletadas em ordem, de forma que só é possível coletar a segunda após coletar a primeira. A cada coleta de moeda, a câmera look-at é posicionada na posição da moeda para que o jogador possa visualizar o que resta do mapa. Ao coletar todas as moedas, o jogador vence. Caso colida com um asteroide ele perde o jogo. Além disso, o jogador pode atirar mísseis contra os asteroides para destruí-los. 
 
 
-Como compilar:\
+## Como compilar:
 
-Em ambiente linux:\
+### Em ambiente linux:
 Para compilar e executar este projeto no Linux, primeiro você precisa instalar\
 as bibliotecas necessárias.\ 
 Esse é normalmente suficiente em uma instalação de Linux Ubuntu:\
