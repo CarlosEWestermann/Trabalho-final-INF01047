@@ -535,10 +535,8 @@ int main(int argc, char* argv[])
         }
         else
         {
-            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-            camera_lookat_l    = glm::vec4(0.0f,0.0f,-300.0f,1.0f);       // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+            camera_lookat_l    = glm::vec4(coinCenter[g_nextCoin].x,coinCenter[g_nextCoin].y,coinCenter[g_nextCoin].z,1.0f);
             camera_view_vector = camera_lookat_l - camera_position_c;  // Vetor "view", sentido para onde a câmera está virada
-            camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);       // Vetor "up" fixado para apontar para o "céu" (eito Y global)
         }
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para definir o sistema de coordenadas da câmera.
@@ -723,6 +721,7 @@ int main(int argc, char* argv[])
             PopMatrix(model);
 
             // Desenhamos modelo da nave
+
             if (g_IsFreeCamera){
                 model = Matrix_Translate(0,0,-18)*Matrix_Rotate_Y(3.141592)*Matrix_Rotate_Z(barrelRollAngle);;
                 glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE , glm::value_ptr(model));
@@ -730,7 +729,7 @@ int main(int argc, char* argv[])
                 glUniform1i(g_object_id_uniform, SPACESHIP);
                 DrawVirtualObject("the_spaceship");
             }
-            
+
 
             float offsetValue = -1.5; //nave eh maior pra tras que pra frente,
 
@@ -746,9 +745,10 @@ int main(int argc, char* argv[])
 
             BoundingSphere shipBoundingSphere  = { shipPosition, 4.0f };
 
+            // verifica foguete vs asteroides
             if (rocketStartTime)
             {
-                glm::vec3 cubeDimensions = glm::vec3(5.0f, 5.0f, 5.0f);  // Replace with the actual dimensions
+                glm::vec3 cubeDimensions = glm::vec3(5.0f, 5.0f, 5.0f);
 
                 glm::vec3 lowerBackLeft =  currentMissilePosition - cubeDimensions * 0.5f;
                 glm::vec3 upperFrontRight = currentMissilePosition + cubeDimensions * 0.5f;
